@@ -1,2 +1,2 @@
-from src.corenodes.display.image import ImageModule
-from src.corenodes.display.result import OutputModule
+from src.corenodes.display.input import InputModule
+from src.corenodes.display.output import OutputModule

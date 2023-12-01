@@ -1,7 +1,7 @@
 from dearpygui import dearpygui as dpg
 
 
-class ImageModule:
+class InputModule:
     def __init__(self, texture) -> None:
         self.texture = texture
 

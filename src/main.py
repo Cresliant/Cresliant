@@ -1,8 +1,8 @@
 import dearpygui.dearpygui as dpg
 from PIL import Image
 
-from src.corenodes.display import ImageModule, OutputModule
-from src.corenodes.features import ResizeModule, RotateModule
+from src.corenodes.display import InputModule, OutputModule
+from src.corenodes.transform import ResizeModule, RotateModule
 
 IMAGE_PATH = r"example.png"
 DISPLAY_TOOLTIPS: bool = False
@@ -18,7 +18,7 @@ with dpg.texture_registry():
 
 File_name_text = "Image_Edit"
 modules = [
-    ImageModule(texture_id),
+    InputModule(texture_id),
     ResizeModule(img),
     RotateModule(img),
     OutputModule(texture_id),
@@ -91,7 +91,7 @@ with dpg.window(
         minimap=True,
         minimap_location=dpg.mvNodeMiniMap_Location_TopRight,
     ):
-        ImageModule(texture_id).run("src/example.png")
+        InputModule(texture_id).run("src/example.png")
 
     # Popups / Right click on nodes -> Click on node before right click on it
 
