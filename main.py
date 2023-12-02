@@ -118,6 +118,10 @@ def delete_nodes(_sender, _app_data):
 def delete_links(_sender, _app_data):
     for link in dpg.get_selected_links("MainNodeEditor"):
         dpg.delete_item(link)
+        for link_ in links:
+            if link_.id == link:
+                links.remove(link_)
+                break
 
 
 def duplicate_nodes(_sender, _app_data):
