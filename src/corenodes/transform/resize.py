@@ -18,10 +18,12 @@ class ResizeModule:
             pos=[500, 20],
         ):
             with dpg.node_attribute():
-                dpg.add_input_int(tag="x_size_" + str(self.counter), label="x", width=100)
-                dpg.add_input_int(tag="y_size_" + str(self.counter), label="y", width=100)
-                dpg.add_input_int(tag="z_size_" + str(self.counter), label="z", width=100, default_value=self.width)
-                dpg.add_input_int(tag="w_size_" + str(self.counter), label="w", width=100, default_value=self.height)
+                dpg.add_input_int(
+                    tag="width_size_" + str(self.counter), label="width", width=100, default_value=self.width
+                )
+                dpg.add_input_int(
+                    tag="height_size_" + str(self.counter), label="height", width=100, default_value=self.height
+                )
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 dpg.add_slider_int(
