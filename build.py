@@ -17,10 +17,9 @@ if sys.platform != "win32":
 
 args = [
     "pyinstaller",
-    "src/main.py",
+    "main.py",
     "--name=Cresliant",
     "--paths=.",
-    "--add-data=assets;assets",
     "--add-data=assets/icon.ico;.",
     "--add-data=assets/example.png;.",
     "--add-data=assets/Roboto-Regular.ttf;.",

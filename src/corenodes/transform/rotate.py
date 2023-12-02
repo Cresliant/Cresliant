@@ -16,7 +16,7 @@ class RotateModule:
             pos=[500, 20],
         ):
             with dpg.node_attribute() as Resize_image:
-                dpg.add_input_float(tag="rotate_degrees_" + str(self.counter), label="Rotate degrees", width=100)
+                dpg.add_input_int(tag="rotate_degrees_" + str(self.counter), label="Rotate degrees", width=100)
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 dpg.add_slider_int(

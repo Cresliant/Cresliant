@@ -36,7 +36,7 @@ class InputModule:
             label="Input image",
             pos=[10, 10],
         ):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
+            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output, user_data="input"):
                 dpg.add_image(self.texture)
                 dpg.add_button(
                     label="Choose Image",
