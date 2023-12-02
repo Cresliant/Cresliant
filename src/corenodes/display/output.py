@@ -18,5 +18,5 @@ class OutputModule:
             label="Output image",
             pos=[500, 10],
         ):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
+            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input, user_data="output"):
                 dpg.add_image(self.texture)
