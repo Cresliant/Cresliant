@@ -16,6 +16,7 @@ class ResizeModule:
             tag="resize_" + str(self.counter),
             label="Resize image",
             pos=[500, 20],
+            user_data=self,
         ):
             with dpg.node_attribute():
                 dpg.add_input_int(

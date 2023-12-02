@@ -6,7 +6,7 @@ class OutputModule:
         self.texture = texture
 
     name = "Output"
-    tooltip = "Image result"
+    tooltip = "Image output"
 
     def run(self):
         if dpg.does_item_exist("Output"):
@@ -15,8 +15,9 @@ class OutputModule:
         with dpg.node(
             parent="MainNodeEditor",
             tag="Output",
-            label="Output image",
+            label="Output",
             pos=[500, 10],
+            user_data=self,
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input, user_data="output"):
                 dpg.add_image(self.texture)

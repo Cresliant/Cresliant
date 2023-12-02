@@ -11,6 +11,7 @@ def pick_image(path, width, height):
     except:
         return
 
+    image = image.convert("RGBA")
     image = image.resize((width, height))
     image = np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0
 
@@ -18,8 +19,8 @@ def pick_image(path, width, height):
 
 
 class InputModule:
-    name = "Image"
-    tooltip = "Image module"
+    name = "Input"
+    tooltip = "Image input"
 
     def __init__(self, texture: str, width: int, height: int):
         self.texture = texture
@@ -33,8 +34,9 @@ class InputModule:
         with dpg.node(
             parent="MainNodeEditor",
             tag="Input",
-            label="Input image",
+            label="Input",
             pos=[10, 10],
+            user_data=self,
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output, user_data="input"):
                 dpg.add_image(self.texture)
