@@ -14,8 +14,9 @@ class RotateModule:
             tag="rotate_" + str(self.counter),
             label="Rotate image",
             pos=[500, 20],
+            user_data=self,
         ):
-            with dpg.node_attribute() as Resize_image:
+            with dpg.node_attribute():
                 dpg.add_input_int(tag="rotate_degrees_" + str(self.counter), label="Rotate degrees", width=100)
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):

@@ -1,5 +1,6 @@
 import os
 import sys
+import webbrowser
 
 import dearpygui.dearpygui as dpg
 from pydantic import BaseModel
@@ -94,20 +95,43 @@ def delink_callback(sender, app_data):
             break
 
 
+def delete_nodes(sender, app_data):
+    for node in dpg.get_selected_nodes("MainNodeEditor"):
+        dpg.delete_item(node)
+
+
+def duplicate_nodes(sender, app_data):
+    for node in dpg.get_selected_nodes("MainNodeEditor"):
+        dpg.get_item_user_data(node).run()
+
+
 with dpg.window(
     tag="popup_window", no_move=True, no_close=True, no_resize=True, no_collapse=True, show=False, label="Add Node"
 ):
     for module in modules[1:-1]:
         dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.run)
 
+with dpg.window(
+    tag="node_popup_window", no_move=True, no_close=True, no_resize=True, no_collapse=True, show=False, label="Settings"
+):
+    dpg.add_button(label="Delete node", callback=delete_nodes)
+    dpg.add_button(label="Duplicate node", callback=duplicate_nodes)
+
 
 def handle_popup(_sender, app_data):
     if app_data == 1 and dpg.is_item_hovered("MainNodeEditor"):
+        if len(dpg.get_selected_nodes("MainNodeEditor")) != 0:
+            dpg.focus_item("node_popup_window")
+            dpg.show_item("node_popup_window")
+            dpg.set_item_pos("node_popup_window", dpg.get_mouse_pos(local=False))
+            return
+
         dpg.focus_item("popup_window")
         dpg.show_item("popup_window")
         dpg.set_item_pos("popup_window", dpg.get_mouse_pos(local=False))
     else:
         dpg.hide_item("popup_window")
+        dpg.hide_item("node_popup_window")
 
 
 with dpg.handler_registry():
@@ -144,16 +168,20 @@ with dpg.window(
                     indent=8,
                 )
 
-            dpg.add_menu_item(tag="Export_Image", label="Export image")
-            dpg.add_menu_item(tag="Close_app", label="Close app", callback=lambda: dpg.stop_dearpygui())
+            dpg.add_menu_item(tag="export", label="Export image")
+            dpg.add_menu_item(tag="close", label="Close app", callback=lambda: dpg.stop_dearpygui())
 
-        with dpg.menu(tag="Nodes", label="Nodes"):
+        with dpg.menu(tag="nodes", label="Nodes"):
             for module in modules[1:]:
                 dpg.add_menu_item(tag=module.name, label=module.name, callback=module.run)
 
-        with dpg.menu(tag="About", label="About"):
-            dpg.add_menu_item(tag="project_info", label="Learn more about project", enabled=False)
-            dpg.add_menu_item(tag="App_Version", label="Crescial v0.1.0", enabled=False)
+        with dpg.menu(tag="about", label="About"):
+            dpg.add_menu_item(
+                tag="github",
+                label="View it on Github",
+                callback=lambda: webbrowser.open("https://github.com/Cresliant/Cresliant"),
+            )
+            dpg.add_menu_item(tag="app_version", label="Cresliant v0.1.0", enabled=False)
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
 
@@ -170,12 +198,6 @@ with dpg.window(
     for module in modules[1:-1]:
         with dpg.tooltip(parent=module.name):
             dpg.add_text(module.tooltip)
-
-    with dpg.tooltip(parent="project_info"):
-        dpg.add_text("Crescial is a free and open source image editor.")
-        dpg.add_text("This project is made by: ")
-        dpg.add_text("FirePlank", bullet=True)
-        dpg.add_text("Potatooff", bullet=True)
 
 
 dpg.setup_dearpygui()
