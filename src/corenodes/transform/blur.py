@@ -14,6 +14,7 @@ class BlurModule:
             tag="blur_" + str(self.counter),
             label="Blur image",
             pos=[600, 20],
+            user_data=self,
         ):
             with dpg.node_attribute():
                 dpg.add_input_int(tag="Blur_input" + str(self.counter), label="% Blur", width=100)

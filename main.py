@@ -113,11 +113,11 @@ with dpg.window(
     no_resize=True,
     no_collapse=True,
     show=False,
-    label="Options",
+    label="Add Node", # Change to Options later on
     width=250,
     height=300,
 ):
-    with dpg.menu(label="Add Node", indent=5):
+    #with dpg.menu(label="Add Node", indent=5): # remove comment once Option is on
         for module in modules[1:-1]:
             dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.run, indent=3, width=200)
 
@@ -167,7 +167,7 @@ with dpg.window(
                     width=200,
                     indent=5,
                 )
-            dpg.add_separator()
+            # dpg.add_separator() # uncomment once more options
             with dpg.menu(tag="Preferences", label="Preferences"):
                 dpg.add_combo(
                     ("PNG", "JPG"),
@@ -186,7 +186,6 @@ with dpg.window(
             dpg.add_button(label="Redo", tag="redo_button", enabled=False, width=150)
             dpg.add_separator()
 
-        with dpg.menu(tag="Nodes", label="Nodes"):
         with dpg.menu(tag="nodes", label="Nodes"):
             for module in modules[1:]:
                 dpg.add_menu_item(tag=module.name, label=module.name, callback=module.run)
