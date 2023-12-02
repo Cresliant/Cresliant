@@ -22,4 +22,4 @@ jobs:
           poetry install --only dev
           
     - name: Run pre-commit hooks
-      run: export PIP_USER=0; pre-commit run --all-files
+      run: export PIP_USER=0; poetry run pre-commit run --all-files
