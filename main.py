@@ -6,7 +6,7 @@ import dearpygui.dearpygui as dpg
 from pydantic import BaseModel
 
 from src.corenodes.display import InputModule, OutputModule
-from src.corenodes.transform import ResizeModule, RotateModule
+from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
 
 
 def resource_path(relative_path):
@@ -35,6 +35,7 @@ modules = [
     InputModule("input_image", width, height),
     ResizeModule(width, height),
     RotateModule(),
+    BlurModule(),
     OutputModule("input_image"),
 ]
 
@@ -106,10 +107,19 @@ def duplicate_nodes(sender, app_data):
 
 
 with dpg.window(
-    tag="popup_window", no_move=True, no_close=True, no_resize=True, no_collapse=True, show=False, label="Add Node"
+    tag="popup_window",
+    no_move=True,
+    no_close=True,
+    no_resize=True,
+    no_collapse=True,
+    show=False,
+    label="Add Node", # Change to Options later on
+    width=250,
+    height=300,
 ):
-    for module in modules[1:-1]:
-        dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.run)
+    #with dpg.menu(label="Add Node", indent=5): # remove comment once Option is on
+        for module in modules[1:-1]:
+            dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.run, indent=3, width=200)
 
 with dpg.window(
     tag="node_popup_window", no_move=True, no_close=True, no_resize=True, no_collapse=True, show=False, label="Settings"
@@ -157,7 +167,7 @@ with dpg.window(
                     width=200,
                     indent=5,
                 )
-
+            # dpg.add_separator() # uncomment once more options
             with dpg.menu(tag="Preferences", label="Preferences"):
                 dpg.add_combo(
                     ("PNG", "JPG"),
@@ -170,6 +180,11 @@ with dpg.window(
 
             dpg.add_menu_item(tag="export", label="Export image")
             dpg.add_menu_item(tag="close", label="Close app", callback=lambda: dpg.stop_dearpygui())
+
+        with dpg.menu(tag="Edit", label="Edit"):
+            dpg.add_button(label="Undo", tag="undo_button", enabled=False, width=150)
+            dpg.add_button(label="Redo", tag="redo_button", enabled=False, width=150)
+            dpg.add_separator()
 
         with dpg.menu(tag="nodes", label="Nodes"):
             for module in modules[1:]:
