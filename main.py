@@ -29,7 +29,6 @@ with dpg.font_registry():
     dpg.add_font(resource_path("Roboto-Regular.ttf"), 17, tag="font")
     dpg.bind_font("font")
 
-
 File_name_text = "Image_Edit"
 modules = [
     InputModule("input_image", width, height),
@@ -49,8 +48,8 @@ class Link(BaseModel):
 links = []
 
 
-def hide_sidebar(sender, app_data, user_data):
-    pass
+def protected_node(data_):
+    return data_ and ("input" in str(data_).lower() or "output" in str(data_).lower())
 
 
 def link_callback(sender, app_data):
@@ -88,7 +87,21 @@ def find_path():
     print(links)
 
 
-def delink_callback(sender, app_data):
+def reset(_sender, _app_data):
+    for node in dpg.get_all_items():
+        try:
+            data_ = dpg.get_item_user_data(node)
+            if data_ and not protected_node(data_):
+                dpg.delete_item(node)
+        except SystemError:
+            pass
+
+
+def export(_sender, _app_data):
+    print("Exporting image...")
+
+
+def delink_callback(_sender, app_data):
     dpg.delete_item(app_data)
     for link in links:
         if link.id == app_data:
@@ -96,14 +109,22 @@ def delink_callback(sender, app_data):
             break
 
 
-def delete_nodes(sender, app_data):
+def delete_nodes(_sender, _app_data):
     for node in dpg.get_selected_nodes("MainNodeEditor"):
-        dpg.delete_item(node)
+        if not protected_node(dpg.get_item_user_data(node)):
+            dpg.delete_item(node)
 
 
-def duplicate_nodes(sender, app_data):
+def delete_links(_sender, _app_data):
+    for link in dpg.get_selected_links("MainNodeEditor"):
+        dpg.delete_item(link)
+
+
+def duplicate_nodes(_sender, _app_data):
     for node in dpg.get_selected_nodes("MainNodeEditor"):
-        dpg.get_item_user_data(node).run()
+        data_ = dpg.get_item_user_data(node)
+        if not protected_node(data_):
+            data_.run()
 
 
 with dpg.window(
@@ -113,19 +134,36 @@ with dpg.window(
     no_resize=True,
     no_collapse=True,
     show=False,
-    label="Add Node", # Change to Options later on
-    width=250,
-    height=300,
+    label="Add Node",
+    width=200,
 ):
-    #with dpg.menu(label="Add Node", indent=5): # remove comment once Option is on
-        for module in modules[1:-1]:
-            dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.run, indent=3, width=200)
+    for module in modules[1:-1]:
+        dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.run, indent=3, width=180)
 
 with dpg.window(
     tag="node_popup_window", no_move=True, no_close=True, no_resize=True, no_collapse=True, show=False, label="Settings"
 ):
     dpg.add_button(label="Delete node", callback=delete_nodes)
     dpg.add_button(label="Duplicate node", callback=duplicate_nodes)
+
+
+def handle_shortcuts(_sender, app_data):
+    if not dpg.is_key_down(dpg.mvKey_Control):
+        return
+
+    match app_data:
+        case dpg.mvKey_V:
+            duplicate_nodes(None, None)
+        case dpg.mvKey_N:
+            reset(None, None)
+        case dpg.mvKey_E:
+            export(None, None)
+        case dpg.mvKey_Q:
+            dpg.stop_dearpygui()
+        case dpg.mvKey_Z:
+            print("Undo")
+        case dpg.mvKey_Y:
+            print("Redo")
 
 
 def handle_popup(_sender, app_data):
@@ -148,6 +186,16 @@ with dpg.handler_registry():
     dpg.add_mouse_click_handler(button=1, callback=handle_popup)
     dpg.add_mouse_release_handler(button=0, callback=handle_popup)
 
+    dpg.add_key_press_handler(key=dpg.mvKey_Delete, callback=delete_nodes)
+    dpg.add_key_press_handler(key=dpg.mvKey_Delete, callback=delete_links)
+
+    dpg.add_key_release_handler(key=dpg.mvKey_V, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_N, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_E, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_Q, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_Z, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_Y, callback=handle_shortcuts)
+
 with dpg.window(
     tag="Cresliant",
     menubar=True,
@@ -159,32 +207,15 @@ with dpg.window(
 ):
     with dpg.menu_bar():
         with dpg.menu(label="File"):
-            with dpg.menu(label="Filename"):
-                dpg.add_input_text(
-                    tag="file_name_entry_box",
-                    hint=File_name_text,
-                    default_value=File_name_text,
-                    width=200,
-                    indent=5,
-                )
-            # dpg.add_separator() # uncomment once more options
-            with dpg.menu(tag="Preferences", label="Preferences"):
-                dpg.add_combo(
-                    ("PNG", "JPG"),
-                    tag="export_image_type",
-                    label="Export image type",
-                    default_value="PNG",
-                    width=75,
-                    indent=8,
-                )
-
-            dpg.add_menu_item(tag="export", label="Export image")
-            dpg.add_menu_item(tag="close", label="Close app", callback=lambda: dpg.stop_dearpygui())
+            dpg.add_menu_item(tag="new", label="New Project", shortcut="Ctrl+N", callback=reset)
+            dpg.add_separator()
+            dpg.add_menu_item(tag="export", label="Export Image As...     ", shortcut="Ctrl+E", callback=export)
+            dpg.add_separator()
+            dpg.add_menu_item(tag="close", label="Quit", shortcut="Ctrl+Q", callback=dpg.stop_dearpygui)
 
         with dpg.menu(tag="Edit", label="Edit"):
-            dpg.add_button(label="Undo", tag="undo_button", enabled=False, width=150)
-            dpg.add_button(label="Redo", tag="redo_button", enabled=False, width=150)
-            dpg.add_separator()
+            dpg.add_menu_item(label="Undo    ", tag="undo", shortcut="Ctrl+Z")
+            dpg.add_menu_item(label="Redo    ", tag="redo", shortcut="Ctrl+Y")
 
         with dpg.menu(tag="nodes", label="Nodes"):
             for module in modules[1:]:
@@ -196,6 +227,7 @@ with dpg.window(
                 label="View it on Github",
                 callback=lambda: webbrowser.open("https://github.com/Cresliant/Cresliant"),
             )
+            dpg.add_separator()
             dpg.add_menu_item(tag="app_version", label="Cresliant v0.1.0", enabled=False)
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
@@ -213,7 +245,6 @@ with dpg.window(
     for module in modules[1:-1]:
         with dpg.tooltip(parent=module.name):
             dpg.add_text(module.tooltip)
-
 
 dpg.setup_dearpygui()
 dpg.show_viewport()
