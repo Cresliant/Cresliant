@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
 
+DEV_MODE = True
+
 
 def resource_path(relative_path):
     if hasattr(sys, "_MEIPASS"):
@@ -233,6 +235,11 @@ with dpg.window(
             )
             dpg.add_separator()
             dpg.add_menu_item(tag="app_version", label="Cresliant v0.1.0", enabled=False)
+
+        if DEV_MODE:
+            with dpg.menu(tag="Dev tools", label="Dev tools"):  # New item registry dev tool
+                dpg.add_menu_item(label="Show Item Registry", callback=lambda: dpg.show_tool(dpg.mvTool_ItemRegistry))
+                dpg.add_menu_item(label="Show Style Editor", callback=lambda: dpg.show_tool(dpg.mvTool_StyleEditor))
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
 
