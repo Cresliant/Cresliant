@@ -12,11 +12,12 @@ class ResizeModule:
 
     def new(self):
         input_image = dpg.get_item_user_data("Input").image
+
         with dpg.node(
             parent="MainNodeEditor",
             tag="resize_" + str(self.counter),
-            label="Resize image",
-            pos=[500, 20],
+            label="Resize",
+            pos=[dpg.get_viewport_width() // 2 - 100, dpg.get_viewport_height() // 2 - 100],
             user_data=self,
         ):
             with dpg.node_attribute():
@@ -46,7 +47,6 @@ class ResizeModule:
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 dpg.add_slider_int(
                     tag="resize_percentage_" + str(self.counter),
-                    label="Resize",
                     width=150,
                     default_value=100,
                     max_value=200,
@@ -61,9 +61,10 @@ class ResizeModule:
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         tag = tag.split("_")[-1]
         percent = dpg.get_value("resize_percentage_" + tag)
-        width = dpg.get_value("width_size_" + tag)
-        height = dpg.get_value("height_size_" + tag)
-        if width != image.width or height != image.height:
-            return image.resize((width, height))
-
-        return image.resize((int(image.width * percent / 100), int(image.height * percent / 100)))
+        return image.resize(
+            (
+                dpg.get_value("width_size_" + tag) * percent // 100,
+                dpg.get_value("height_size_" + tag) * percent // 100,
+            ),
+            Image.LANCZOS,
+        )

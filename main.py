@@ -3,13 +3,14 @@ import sys
 import webbrowser
 
 import dearpygui.dearpygui as dpg
-import numpy as np
 from PIL import Image
 from pydantic import BaseModel
 
 import ImageController as dpg_img
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
+
+path = []
 
 
 def resource_path(relative_path):
@@ -19,7 +20,7 @@ def resource_path(relative_path):
 
 
 dpg.create_context()
-dpg.create_viewport(title="Cresliant", width=1200, height=1000)
+dpg.create_viewport(title="Cresliant", small_icon=resource_path("icon.ico"), large_icon=resource_path("icon.ico"))
 
 # For quick testing, load an image immediately from the disk to speed up development
 pillow_image = Image.open(resource_path("example.png"))
@@ -31,25 +32,26 @@ with dpg.font_registry():
     dpg.bind_font("font")
 
 
-def update_output():
-    path = []
+def update_path():
+    global path
 
+    path.clear()
     for node in dpg.get_all_items():
         try:
             data_ = dpg.get_item_user_data(node)
         except SystemError:
             continue
         if data_ and "input" in str(data_).lower():
-            path.append((node, node))
+            path.append(node)
             break
 
     while True:
-        link = dpg.get_item_info(path[-1][0])["children"][1][-1]
+        link = dpg.get_item_info(path[-1])["children"][1][-1]
         found = False
         for link_ in links:
             if link_.source == link:
                 try:
-                    path.append((dpg.get_item_info(link_.target)["parent"], link_.target))
+                    path.append(dpg.get_item_info(link_.target)["parent"])
                 except SystemError:
                     continue
 
@@ -59,15 +61,17 @@ def update_output():
         if not found:
             break
 
-    output = dpg.get_item_user_data(path[-1][0])
+
+def update_output():
+    output = dpg.get_item_user_data(path[-1])
     if "output" not in str(output).lower():
         dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
         return
 
     image = Image.new("RGBA", (width, height))
     for node in path[:-1]:
-        tag = dpg.get_item_alias(node[0])
-        node = dpg.get_item_user_data(node[0])
+        tag = dpg.get_item_alias(node)
+        node = dpg.get_item_user_data(node)
         image = node.run(image, tag)
 
     output.viewer.load(image)
@@ -107,6 +111,7 @@ def link_callback(sender, app_data):
     link = dpg.add_node_link(app_data[0], app_data[1], parent=sender)
     links.append(Link(source=app_data[0], target=app_data[1], id=int(link)))
 
+    update_path()
     update_output()
 
 
@@ -119,6 +124,12 @@ def reset(_sender, _app_data):
         if data_ and not protected_node(data_):
             dpg.delete_item(node)
 
+    links.clear()
+
+    modules[0].new()
+    modules[-1].new()
+
+    update_path()
     update_output()
 
 
@@ -133,6 +144,7 @@ def delink_callback(_sender, app_data):
             links.remove(link)
             break
 
+    update_path()
     update_output()
 
 
@@ -145,6 +157,7 @@ def delete_nodes(_sender, _app_data):
                 if link.source in node_links or link.target in node_links:
                     links.remove(link)
 
+    update_path()
     update_output()
 
 
@@ -156,6 +169,7 @@ def delete_links(_sender, _app_data):
                 links.remove(link_)
                 break
 
+    update_path()
     update_output()
 
 
@@ -195,7 +209,7 @@ def handle_shortcuts(_sender, app_data):
             duplicate_nodes(None, None)
         case dpg.mvKey_N:
             reset(None, None)
-        case dpg.mvKey_E:
+        case dpg.mvKey_S:
             export(None, None)
         case dpg.mvKey_Q:
             dpg.stop_dearpygui()
@@ -240,6 +254,7 @@ with dpg.handler_registry():
     dpg.add_key_release_handler(key=dpg.mvKey_F11, callback=dpg.show_style_editor)
     dpg.add_key_release_handler(key=dpg.mvKey_F12, callback=dpg.show_metrics)
 
+
 with dpg.window(
     tag="Cresliant",
     menubar=True,
@@ -253,7 +268,8 @@ with dpg.window(
         with dpg.menu(tag="file", label="File"):
             dpg.add_menu_item(tag="new", label="New Project", shortcut="Ctrl+N", callback=reset)
             dpg.add_separator()
-            dpg.add_menu_item(tag="export", label="Export Image As...     ", shortcut="Ctrl+S", callback=export)
+            dpg.add_menu_item(tag="open", label="Save Project...", shortcut="Ctrl+S", callback=reset)
+            dpg.add_menu_item(tag="export", label="Export Output Image...     ", shortcut="Ctrl+E", callback=export)
             dpg.add_separator()
             dpg.add_menu_item(tag="close", label="Quit", shortcut="Ctrl+Q", callback=dpg.stop_dearpygui)
 
@@ -286,8 +302,6 @@ with dpg.window(
         modules[0].new()
         modules[-1].new()
 
-        # dpg.add_node_link(dpg.get_item_info("Input")["children"][1][0], dpg.get_item_info("Output")["children"][1][0])
-
     for module in modules[1:-1]:
         with dpg.tooltip(parent=module.name):
             dpg.add_text(module.tooltip)
@@ -296,6 +310,7 @@ with dpg.window(
 
 dpg.setup_dearpygui()
 dpg.show_viewport()
+dpg.maximize_viewport()
 dpg.set_primary_window("Cresliant", True)
 dpg.start_dearpygui()
 dpg.destroy_context()

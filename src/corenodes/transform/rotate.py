@@ -14,16 +14,15 @@ class RotateModule:
         with dpg.node(
             parent="MainNodeEditor",
             tag="rotate_" + str(self.counter),
-            label="Rotate image",
-            pos=[500, 100],
+            label="Rotate",
+            pos=[dpg.get_viewport_width() // 2 - 100, dpg.get_viewport_height() // 2 - 100],
             user_data=self,
         ):
             dpg.add_node_attribute(attribute_type=dpg.mvNode_Attr_Input)
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 dpg.add_slider_int(
                     tag="rotate_degrees_" + str(self.counter),
-                    label="Rotate",
-                    width=100,
+                    width=150,
                     max_value=360,
                     clamped=True,
                     format="%0.0f°",

@@ -36,11 +36,12 @@ class InputModule:
             parent="MainNodeEditor",
             tag="Input",
             label="Input",
-            pos=[10, 10],
+            pos=[10, 100],
             user_data=self,
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 self.viewer = dpg_img.add_image(self.image)
+                dpg.add_spacer(height=5)
                 dpg.add_button(
                     label="Choose Image",
                     width=120,

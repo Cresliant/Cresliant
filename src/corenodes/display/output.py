@@ -20,7 +20,7 @@ class OutputModule:
             parent="MainNodeEditor",
             tag="Output",
             label="Output",
-            pos=[500, 10],
+            pos=[800, 100],
             user_data=self,
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):

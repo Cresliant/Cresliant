@@ -280,7 +280,10 @@ class ImageViewer(ImageViewerCreator):
         if not self.group:  # If not created
             return
         width, height = self.get_size()
-        dpg.delete_item(self._view_window, children_only=True)
+        try:
+            dpg.delete_item(self._view_window, children_only=True)
+        except SystemError:
+            return self
         dpg.configure_item(self._view_window, width=width, height=height)
 
         try:
@@ -306,7 +309,11 @@ class ImageViewer(ImageViewerCreator):
             return
         self.dpg_image = None
 
-        dpg.delete_item(self._view_window, children_only=True)
+        try:
+            dpg.delete_item(self._view_window, children_only=True)
+        except SystemError:
+            return self
+
         if self.image:
             self.create_loading_indicator()
 
