@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 from pydantic import BaseModel
 
+import ImageController as dpg_img
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
 
@@ -21,14 +22,9 @@ dpg.create_context()
 dpg.create_viewport(title="Cresliant", width=1200, height=1000)
 
 # For quick testing, load an image immediately from the disk to speed up development
-width, height, channels, data = dpg.load_image(resource_path("example.png"))
 pillow_image = Image.open(resource_path("example.png"))
-empty = [0] * width * height * 4
-
-with dpg.texture_registry():
-    dpg.add_static_texture(width, height, data, tag="input_image_0")
-    dpg.add_dynamic_texture(width, height, empty, tag="output_image_0")
-    # dpg.add_static_texture(width, height, empty, tag="empty_image")
+width, height = pillow_image.size
+dpg_img.set_texture_registry(dpg.add_texture_registry())
 
 with dpg.font_registry():
     dpg.add_font(resource_path("Roboto-Regular.ttf"), 17, tag="font")
@@ -65,6 +61,7 @@ def update_output():
 
     output = dpg.get_item_user_data(path[-1][0])
     if "output" not in str(output).lower():
+        dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
         return
 
     image = Image.new("RGBA", (width, height))
@@ -73,48 +70,15 @@ def update_output():
         node = dpg.get_item_user_data(node[0])
         image = node.run(image, tag)
 
-    # w, h = image.size
-    image = image.resize((width, height))
-    image = np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0
-
-    # output = dpg.get_item_user_data(path[-1][0])
-    # dpg.delete_item("output_image_" + str(output.counter))
-    # dpg.remove_alias("output_image_" + str(output.counter))
-    #
-    # output.counter += 1
-    # output.texture = "output_image_" + str(output.counter)
-    #
-    # with dpg.texture_registry(show=False):
-    #     dpg.add_static_texture(
-    #         width=w,
-    #         height=h,
-    #         default_value=image,
-    #         tag=output.texture,
-    #     )
-
-    dpg.set_value("output_image_0", image)
-    # output.new()
-    # link nodes to output again that were disconnected by the update
-    # for link in links:
-    #     # print(link.source, link.target, path[-1])
-    #     # print(dpg.get_item_info("Output"))
-    #     if link.target == path[-1][1]:
-    #         output = dpg.get_item_info("Output")
-    #         print(output, dpg.get_item_info("Input")["children"][1][0])
-    #         print(dpg.get_item_info(dpg.get_item_info(output["parent"])["children"][1][0])["children"][1][0])
-    #         dpg.add_node_link(
-    #             dpg.get_item_info(dpg.get_item_info(output["parent"])["children"][1][0])["children"][1][0],
-    #             output["children"][1][0],
-    #             parent="MainNodeEditor"
-    #         )
+    output.viewer.load(image)
 
 
 modules = [
-    InputModule("input_image_0", pillow_image, update_output),
-    ResizeModule(width, height, update_output),
+    InputModule(pillow_image, update_output),
+    ResizeModule(update_output),
     RotateModule(update_output),
     BlurModule(update_output),
-    OutputModule("output_image_0"),
+    OutputModule(Image.new("RGBA", pillow_image.size)),
 ]
 
 

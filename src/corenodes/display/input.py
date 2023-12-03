@@ -1,18 +1,19 @@
 from tkinter.filedialog import askopenfilename
 
-import numpy as np
 from dearpygui import dearpygui as dpg
 from PIL import Image
+
+import ImageController as dpg_img
 
 
 class InputModule:
     name = "Input"
     tooltip = "Image input"
 
-    def __init__(self, texture: str, pillow_image: Image.Image, update_output: callable):
+    def __init__(self, image: Image.Image, update_output: callable):
         self.counter = 0
-        self.texture = texture
-        self.image = pillow_image
+        self.image = image
+        self.viewer = None
         self.update_output = update_output
 
     def pick_image(self, path):
@@ -23,24 +24,8 @@ class InputModule:
 
         image = image.convert("RGBA")
         image.thumbnail((450, 450), Image.LANCZOS)
-        width, height = image.size
         self.image = image
-
-        image = np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0
-        dpg.delete_item(self.texture)
-
-        self.counter += 1
-        self.texture = "input_image_" + str(self.counter)
-
-        with dpg.texture_registry(show=False):
-            dpg.add_static_texture(
-                width=width,
-                height=height,
-                default_value=image,
-                tag=self.texture,
-            )
-
-        self.new()
+        self.viewer.load(image)
         self.update_output()
 
     def new(self):
@@ -55,7 +40,7 @@ class InputModule:
             user_data=self,
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
-                dpg.add_image(self.texture)
+                self.viewer = dpg_img.add_image(self.image)
                 dpg.add_button(
                     label="Choose Image",
                     width=120,

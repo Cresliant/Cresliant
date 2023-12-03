@@ -1,13 +1,16 @@
 from dearpygui import dearpygui as dpg
 
+import ImageController as dpg_img
+
 
 class OutputModule:
     name = "Output"
     tooltip = "Image output"
 
-    def __init__(self, texture) -> None:
+    def __init__(self, image) -> None:
         self.counter = 0
-        self.texture = texture
+        self.image = image
+        self.viewer = None
 
     def new(self):
         if dpg.does_item_exist("Output"):
@@ -21,4 +24,4 @@ class OutputModule:
             user_data=self,
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
-                dpg.add_image(self.texture)
+                self.viewer = dpg_img.add_image(self.image)

@@ -6,13 +6,12 @@ class ResizeModule:
     name = "Resize"
     tooltip = "Resize image"
 
-    def __init__(self, width: int, height: int, update_output: callable):
+    def __init__(self, update_output: callable):
         self.counter = 0
-        self.width = width
-        self.height = height
         self.update_output = update_output
 
     def new(self):
+        input_image = dpg.get_item_user_data("Input").image
         with dpg.node(
             parent="MainNodeEditor",
             tag="resize_" + str(self.counter),
@@ -25,14 +24,22 @@ class ResizeModule:
                     tag="width_size_" + str(self.counter),
                     label="width",
                     width=100,
-                    default_value=self.width,
+                    default_value=input_image.width,
+                    min_value=1,
+                    min_clamped=True,
+                    max_value=10000,
+                    max_clamped=True,
                     callback=self.update_output,
                 )
                 dpg.add_input_int(
                     tag="height_size_" + str(self.counter),
                     label="height",
                     width=100,
-                    default_value=self.height,
+                    min_value=1,
+                    min_clamped=True,
+                    max_value=10000,
+                    max_clamped=True,
+                    default_value=input_image.height,
                     callback=self.update_output,
                 )
 
@@ -43,7 +50,8 @@ class ResizeModule:
                     width=150,
                     default_value=100,
                     max_value=200,
-                    min_value=0,
+                    min_value=1,
+                    clamped=True,
                     format="%0.0f%%",
                     callback=self.update_output,
                 )
@@ -53,9 +61,9 @@ class ResizeModule:
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         tag = tag.split("_")[-1]
         percent = dpg.get_value("resize_percentage_" + tag)
-        return image.resize(
-            (
-                int(dpg.get_value("width_size_" + tag) * percent / 100),
-                int(dpg.get_value("height_size_" + tag) * percent / 100),
-            )
-        )
+        width = dpg.get_value("width_size_" + tag)
+        height = dpg.get_value("height_size_" + tag)
+        if width != image.width or height != image.height:
+            return image.resize((width, height))
+
+        return image.resize((int(image.width * percent / 100), int(image.height * percent / 100)))
