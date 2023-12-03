@@ -239,7 +239,7 @@ with dpg.window(
         if DEV_MODE:
             with dpg.menu(tag="Dev tools", label="Dev tools"):  # New item registry dev tool
                 dpg.add_menu_item(label="Show Item Registry", callback=lambda: dpg.show_tool(dpg.mvTool_ItemRegistry))
-                dpg.add_menu_item(label="Show Style Editor", callback=lambda: dpg.show_tool(dpg.mvTool_StyleEditor))
+                dpg.add_menu_item(label="Show Style Editor", callback=lambda:dpg.show_tool(dpg.mvTool_Style))
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
 
