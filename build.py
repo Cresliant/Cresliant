@@ -11,10 +11,6 @@ if sys.prefix == get_base_prefix_compat():
     print("Please run this script using the virtual environment")
     sys.exit()
 
-if sys.platform != "win32":
-    print("This script is only for Windows")
-    sys.exit()
-
 args = [
     "pyinstaller",
     "main.py",
