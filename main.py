@@ -271,6 +271,11 @@ with dpg.handler_registry():
     dpg.add_key_release_handler(key=dpg.mvKey_Z, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_Y, callback=handle_shortcuts)
 
+    # Dev tools
+    dpg.add_key_release_handler(key=dpg.mvKey_F10, callback=dpg.show_item_registry)
+    dpg.add_key_release_handler(key=dpg.mvKey_F11, callback=dpg.show_style_editor)
+    dpg.add_key_release_handler(key=dpg.mvKey_F12, callback=dpg.show_metrics)
+
 with dpg.window(
     tag="Cresliant",
     menubar=True,
