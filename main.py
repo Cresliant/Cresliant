@@ -10,8 +10,6 @@ from pydantic import BaseModel
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
 
-DEV_MODE = True
-
 
 def resource_path(relative_path):
     if hasattr(sys, "_MEIPASS"):
@@ -273,6 +271,11 @@ with dpg.handler_registry():
     dpg.add_key_release_handler(key=dpg.mvKey_Z, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_Y, callback=handle_shortcuts)
 
+    # Dev tools
+    dpg.add_key_release_handler(key=dpg.mvKey_F10, callback=dpg.show_item_registry)
+    dpg.add_key_release_handler(key=dpg.mvKey_F11, callback=dpg.show_style_editor)
+    dpg.add_key_release_handler(key=dpg.mvKey_F12, callback=dpg.show_metrics)
+
 with dpg.window(
     tag="Cresliant",
     menubar=True,
@@ -306,11 +309,6 @@ with dpg.window(
             )
             dpg.add_separator()
             dpg.add_menu_item(tag="version", label="Cresliant v0.1.0", enabled=False)
-
-        if DEV_MODE:
-            with dpg.menu(tag="Dev tools", label="Dev tools"):  # New item registry dev tool
-                dpg.add_menu_item(label="Show Item Registry", callback=lambda: dpg.show_tool(dpg.mvTool_ItemRegistry))
-                dpg.add_menu_item(label="Show Style Editor", callback=lambda:dpg.show_tool(dpg.mvTool_Style))
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
 
