@@ -1,32 +1,36 @@
 from dearpygui import dearpygui as dpg
+from PIL import Image
 
 
 class RotateModule:
-    def __init__(self) -> None:
-        self.counter = 0
-
     name = "Rotate"
-    tooltip = "Rotate tool for rotating the image"
+    tooltip = "Rotate image"
 
-    def run(self):
+    def __init__(self, update_output: callable):
+        self.counter = 0
+        self.update_output = update_output
+
+    def new(self):
         with dpg.node(
             parent="MainNodeEditor",
             tag="rotate_" + str(self.counter),
             label="Rotate image",
-            pos=[500, 20],
+            pos=[500, 100],
             user_data=self,
         ):
-            with dpg.node_attribute():
-                dpg.add_input_int(tag="rotate_degrees_" + str(self.counter), label="Rotate degrees", width=100)
-
+            dpg.add_node_attribute(attribute_type=dpg.mvNode_Attr_Input)
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 dpg.add_slider_int(
-                    tag="rotate_percentage_" + str(self.counter),
-                    label="Rotate in percentage",
-                    width=150,
-                    default_value=0,
+                    tag="rotate_degrees_" + str(self.counter),
+                    label="Rotate",
+                    width=100,
                     max_value=360,
-                    min_value=0,
+                    clamped=True,
+                    format="%0.0f°",
+                    callback=self.update_output,
                 )
 
         self.counter += 1
+
+    def run(self, image: Image.Image, tag: str) -> Image.Image:
+        return image.rotate(dpg.get_value("rotate_degrees_" + tag.split("_")[-1]))
