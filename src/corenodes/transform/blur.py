@@ -9,6 +9,7 @@ class BlurModule:
     def __init__(self, update_output: callable):
         self.counter = 0
         self.update_output = update_output
+        self.settings = {}
 
     def new(self):
         with dpg.node(
@@ -31,6 +32,7 @@ class BlurModule:
                     callback=self.update_output,
                 )
 
+        self.settings["blur_" + str(self.counter)] = {"blur_percentage_" + str(self.counter): 0}
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:

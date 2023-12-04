@@ -1,6 +1,8 @@
+import json
 import os
 import sys
 import webbrowser
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 import dearpygui.dearpygui as dpg
 from PIL import Image
@@ -62,8 +64,22 @@ def update_path():
             break
 
 
-def update_output():
-    output = dpg.get_item_user_data(path[-1])
+def update_output(sender=None, app_data=None):
+    if sender and app_data:
+        try:
+            node = dpg.get_item_info(dpg.get_item_info(sender)["parent"])["parent"]
+            module = dpg.get_item_user_data(node)
+        except SystemError:
+            return
+
+        module.settings[dpg.get_item_alias(node)][sender] = app_data
+        print(module.settings)
+
+    try:
+        output = dpg.get_item_user_data(path[-1])
+    except IndexError:
+        dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
+        return
     if "output" not in str(output).lower():
         dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
         return
@@ -75,6 +91,7 @@ def update_output():
         image = node.run(image, tag)
 
     output.viewer.load(image)
+    output.image = image
 
 
 modules = [
@@ -115,7 +132,7 @@ def link_callback(sender, app_data):
     update_output()
 
 
-def reset(_sender, _app_data):
+def reset(_sender=None, _app_data=None):
     for node in dpg.get_all_items():
         try:
             data_ = dpg.get_item_user_data(node)
@@ -133,8 +150,111 @@ def reset(_sender, _app_data):
     update_output()
 
 
-def export(_sender, _app_data):
-    print("Exporting image...")
+def export():
+    image = dpg.get_item_user_data("Output").image
+    image.save(
+        asksaveasfilename(
+            filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("BMP", "*.bmp")],
+            defaultextension=".png",
+            initialfile="output.png",
+            initialdir=os.curdir,
+        )
+    )
+
+
+def save_project():
+    data = {"nodes": {}, "links": []}
+    for node in dpg.get_all_items():
+        try:
+            data_ = dpg.get_item_user_data(node)
+        except SystemError:
+            continue
+        if data_:
+            data["nodes"][dpg.get_item_alias(node)] = {
+                "pos": dpg.get_item_pos(node),
+                "settings": data_.settings if hasattr(data_, "settings") else {},
+            }
+
+    for link in links:
+        data["links"].append(
+            {
+                "source": str(dpg.get_item_user_data(dpg.get_item_info(link.source)["parent"])),
+                "target": str(dpg.get_item_user_data(dpg.get_item_info(link.target)["parent"])),
+            }
+        )
+
+    with open(
+        asksaveasfilename(
+            filetypes=[("Cresliant", "*.cresliant")],
+            defaultextension=".cresliant",
+            initialfile="project.cresliant",
+            initialdir=os.curdir,
+        ),
+        "w",
+    ) as file:
+        file.write(json.dumps(data))
+
+
+def open_project():
+    try:
+        data = json.load(
+            open(
+                askopenfilename(
+                    filetypes=[("Cresliant", "*.cresliant")],
+                    initialdir=os.curdir,
+                )
+            )
+        )
+    except FileNotFoundError:
+        return
+
+    reset()
+    nodes = []
+    for node in data["nodes"]:
+        module = None
+        for module_ in modules:
+            if module_.name.lower() in node.lower():
+                module = module_
+                break
+
+        if not module:
+            continue
+
+        module.new()
+        if "_" in node:
+            tag = node.split("_", maxsplit=2)[0] + "_" + str(module.counter - 1)
+        else:
+            tag = node
+
+        nodes.append(tag)
+        dpg.set_item_pos(tag, data["nodes"][node]["pos"])
+
+        for setting in data["nodes"][node]["settings"].get(node, {}):
+            tag = "_".join(setting.split("_")[0:-1]) + "_" + str(module.counter - 1)
+            dpg.set_value(tag, data["nodes"][node]["settings"][node][setting])
+
+    for link in data["links"]:
+        source = None
+        target = None
+        for node in nodes:
+            check = node.split("_", maxsplit=2)[0]
+            if check in link["source"]:
+                source = dpg.get_item_info(node)["children"][1][-1]
+            elif check in link["target"]:
+                target = dpg.get_item_info(node)["children"][1][0]
+
+        if not source or not target:
+            continue
+
+        link = dpg.add_node_link(
+            source,
+            target,
+            parent="MainNodeEditor",
+        )
+        links.append(Link(source=source, target=target, id=int(link)))
+
+    update_path()
+    update_output()
 
 
 def delink_callback(_sender, app_data):
@@ -208,9 +328,13 @@ def handle_shortcuts(_sender, app_data):
         case dpg.mvKey_V:
             duplicate_nodes(None, None)
         case dpg.mvKey_N:
-            reset(None, None)
+            reset()
+        case dpg.mvKey_E:
+            export()
         case dpg.mvKey_S:
-            export(None, None)
+            save_project()
+        case dpg.mvKey_O:
+            open_project()
         case dpg.mvKey_Q:
             dpg.stop_dearpygui()
         case dpg.mvKey_Z:
@@ -245,6 +369,8 @@ with dpg.handler_registry():
     dpg.add_key_release_handler(key=dpg.mvKey_V, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_N, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_E, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_S, callback=handle_shortcuts)
+    dpg.add_key_release_handler(key=dpg.mvKey_O, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_Q, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_Z, callback=handle_shortcuts)
     dpg.add_key_release_handler(key=dpg.mvKey_Y, callback=handle_shortcuts)
@@ -267,9 +393,10 @@ with dpg.window(
     with dpg.menu_bar():
         with dpg.menu(tag="file", label="File"):
             dpg.add_menu_item(tag="new", label="New Project", shortcut="Ctrl+N", callback=reset)
+            dpg.add_menu_item(tag="open", label="Open Project...", shortcut="Ctrl+O", callback=open_project)
             dpg.add_separator()
-            dpg.add_menu_item(tag="open", label="Save Project...", shortcut="Ctrl+S", callback=reset)
-            dpg.add_menu_item(tag="export", label="Export Output Image...     ", shortcut="Ctrl+E", callback=export)
+            dpg.add_menu_item(tag="save", label="Save Project...", shortcut="Ctrl+S", callback=save_project)
+            dpg.add_menu_item(tag="export", label="Export Output...     ", shortcut="Ctrl+E", callback=export)
             dpg.add_separator()
             dpg.add_menu_item(tag="close", label="Quit", shortcut="Ctrl+Q", callback=dpg.stop_dearpygui)
 

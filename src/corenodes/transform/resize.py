@@ -9,6 +9,7 @@ class ResizeModule:
     def __init__(self, update_output: callable):
         self.counter = 0
         self.update_output = update_output
+        self.settings = {}
 
     def new(self):
         input_image = dpg.get_item_user_data("Input").image
@@ -56,6 +57,11 @@ class ResizeModule:
                     callback=self.update_output,
                 )
 
+        self.settings["resize_" + str(self.counter)] = {
+            "width_size_" + str(self.counter): input_image.width,
+            "height_size_" + str(self.counter): input_image.height,
+            "resize_percentage_" + str(self.counter): 100,
+        }
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
