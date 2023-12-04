@@ -2,15 +2,10 @@
 <h1 align="center">
 <img src="./assets/icon.ico" width="100" />
 <br>Cresliant</h1>
-<h3>◦ A powerful node-based image editor made in Python</h3>
+<h3>A powerful node-based image editor made in Python</h3>
 <p align="center">
-<img src="https://img.shields.io/badge/precommit-FAB040.svg?style=flat-square&logo=pre-commit&logoColor=black" alt="precommit" />
-<img src="https://img.shields.io/badge/HTML5-E34F26.svg?style=flat-square&logo=HTML5&logoColor=white" alt="HTML5" />
-<img src="https://img.shields.io/badge/YAML-CB171E.svg?style=flat-square&logo=YAML&logoColor=white" alt="YAML" />
-<img src="https://img.shields.io/badge/Poetry-60A5FA.svg?style=flat-square&logo=Poetry&logoColor=white" alt="Poetry" />
 <img src="https://img.shields.io/badge/Python-3776AB.svg?style=flat-square&logo=Python&logoColor=white" alt="Python" />
-<img src="https://img.shields.io/badge/AIOHTTP-2C5BB4.svg?style=flat-square&logo=AIOHTTP&logoColor=white" alt="AIOHTTP" />
-<img src="https://img.shields.io/badge/NumPy-013243.svg?style=flat-square&logo=NumPy&logoColor=white" alt="NumPy" />
+<img src="https://img.shields.io/badge/License-GPL--3.0-orange.svg" alt="License" />
 </p>
 </div>
 
@@ -22,7 +17,6 @@
 - [📦 Features](#-features)
 - [🚀 Getting Started](#-getting-started)
 - [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
 ---
 
 
@@ -114,11 +108,3 @@ Once your PR is reviewed and approved, it will be merged into the main branch.
 </details>
 
 ---
-
-## 📄 License
-
-
-This project is protected under the [GPL-3.0](https://github.com/Cresliant/Cresliant/blob/dev/LICENSE) License.
-
----
-
