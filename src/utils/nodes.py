@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 
 
-def find_available_pos() -> list[float, float]:
+def find_available_pos() -> list[int]:
     """
     Finds an available position for a new node that is not overlapping with any other node
     """

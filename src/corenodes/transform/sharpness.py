@@ -26,11 +26,10 @@ class SharpnessModule:
                 dpg.add_slider_int(
                     tag="sharpness_percentage_" + str(self.counter),
                     width=150,
-                    max_value=255,
-                    min_value=-255,
-                    default_value=0,
+                    max_value=100,
+                    min_value=0,
                     clamped=True,
-                    format="%0.0f",
+                    format="%0.0f%%",
                     callback=self.update_output,
                 )
 
