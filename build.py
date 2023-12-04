@@ -15,7 +15,6 @@ args = [
     "pyinstaller",
     "main.py",
     "--name=Cresliant",
-    "--paths=.",
     "--add-data=assets/icon.ico;.",
     "--add-data=assets/example.png;.",
     "--add-data=assets/Roboto-Regular.ttf;.",
@@ -24,6 +23,7 @@ args = [
     "--noconfirm",
 ]
 
-# args.append("--icon=assets/icon.ico")
+if sys.platform == "win32":
+    args.append("--icon=assets/icon.ico")
 
 subprocess.call(args)

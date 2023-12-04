@@ -1,2 +1,2 @@
-from src.corenodes.display.input import InputModule
-from src.corenodes.display.output import OutputModule
+from .input import InputModule
+from .output import OutputModule

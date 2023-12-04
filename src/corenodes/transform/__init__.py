@@ -1,3 +1,3 @@
-from src.corenodes.transform.blur import BlurModule
-from src.corenodes.transform.resize import ResizeModule
-from src.corenodes.transform.rotate import RotateModule
+from .blur import BlurModule
+from .resize import ResizeModule
+from .rotate import RotateModule

@@ -1,6 +1,8 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image
 
+from src.utils import find_available_pos
+
 
 class ResizeModule:
     name = "Resize"
@@ -18,7 +20,7 @@ class ResizeModule:
             parent="MainNodeEditor",
             tag="resize_" + str(self.counter),
             label="Resize",
-            pos=[dpg.get_viewport_width() // 2 - 100, dpg.get_viewport_height() // 2 - 100],
+            pos=find_available_pos(),
             user_data=self,
         ):
             with dpg.node_attribute():
@@ -66,11 +68,11 @@ class ResizeModule:
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         tag = tag.split("_")[-1]
-        percent = dpg.get_value("resize_percentage_" + tag)
+        percent = self.settings["resize_" + tag]["resize_percentage_" + tag]
         return image.resize(
             (
-                dpg.get_value("width_size_" + tag) * percent // 100,
-                dpg.get_value("height_size_" + tag) * percent // 100,
+                self.settings["resize_" + tag]["width_size_" + tag] * percent // 100,
+                self.settings["resize_" + tag]["height_size_" + tag] * percent // 100,
             ),
             Image.LANCZOS,
         )

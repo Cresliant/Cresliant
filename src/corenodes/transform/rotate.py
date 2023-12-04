@@ -1,6 +1,8 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image
 
+from src.utils import find_available_pos
+
 
 class RotateModule:
     name = "Rotate"
@@ -16,7 +18,7 @@ class RotateModule:
             parent="MainNodeEditor",
             tag="rotate_" + str(self.counter),
             label="Rotate",
-            pos=[dpg.get_viewport_width() // 2 - 100, dpg.get_viewport_height() // 2 - 100],
+            pos=find_available_pos(),
             user_data=self,
         ):
             dpg.add_node_attribute(attribute_type=dpg.mvNode_Attr_Input)
@@ -34,4 +36,4 @@ class RotateModule:
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
-        return image.rotate(dpg.get_value("rotate_degrees_" + tag.split("_")[-1]))
+        return image.rotate(self.settings[tag]["rotate_degrees_" + tag.split("_")[1]])
