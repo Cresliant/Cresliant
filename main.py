@@ -10,7 +10,14 @@ from pydantic import BaseModel
 
 import ImageController as dpg_img
 from src.corenodes.display import InputModule, OutputModule
-from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
+from src.corenodes.transform import (
+    BrightnessModule,
+    ContrastModule,
+    GaussianBlurModule,
+    ResizeModule,
+    RotateModule,
+    SharpnessModule,
+)
 
 
 class Link(BaseModel):
@@ -105,7 +112,10 @@ modules = [
     InputModule(pillow_image, update_output),
     ResizeModule(update_output),
     RotateModule(update_output),
-    BlurModule(update_output),
+    GaussianBlurModule(update_output),
+    BrightnessModule(update_output),
+    ContrastModule(update_output),
+    SharpnessModule(update_output),
     OutputModule(Image.new("RGBA", pillow_image.size)),
 ]
 
