@@ -12,6 +12,14 @@ import ImageController as dpg_img
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import BlurModule, ResizeModule, RotateModule
 
+
+class Link(BaseModel):
+    source: int
+    target: int
+    id: int
+
+
+links = []
 path = []
 
 
@@ -73,7 +81,6 @@ def update_output(sender=None, app_data=None):
             return
 
         module.settings[dpg.get_item_alias(node)][sender] = app_data
-        print(module.settings)
 
     try:
         output = dpg.get_item_user_data(path[-1])
@@ -101,15 +108,6 @@ modules = [
     BlurModule(update_output),
     OutputModule(Image.new("RGBA", pillow_image.size)),
 ]
-
-
-class Link(BaseModel):
-    source: int
-    target: int
-    id: int
-
-
-links = []
 
 
 def protected_node(data_):

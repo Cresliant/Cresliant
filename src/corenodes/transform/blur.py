@@ -1,6 +1,8 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image, ImageFilter
 
+from src.utils import find_available_pos
+
 
 class BlurModule:
     name = "Blur"
@@ -16,7 +18,7 @@ class BlurModule:
             parent="MainNodeEditor",
             tag="blur_" + str(self.counter),
             label="Blur",
-            pos=[dpg.get_viewport_width() // 2 - 100, dpg.get_viewport_height() // 2 - 100],
+            pos=find_available_pos(),
             user_data=self,
         ):
             dpg.add_node_attribute(attribute_type=dpg.mvNode_Attr_Input)
@@ -37,5 +39,5 @@ class BlurModule:
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         return image.filter(
-            ImageFilter.GaussianBlur(radius=dpg.get_value("blur_percentage_" + tag.split("_")[-1]) / 80)
+            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_percentage_" + tag.split("_")[1]] / 70)
         )
