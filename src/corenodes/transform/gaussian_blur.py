@@ -4,7 +4,7 @@ from PIL import Image, ImageFilter
 from src.utils import find_available_pos
 
 
-class BlurModule:
+class GaussianBlurModule:
     name = "Blur"
     tooltip = "Blur image"
 
@@ -16,15 +16,15 @@ class BlurModule:
     def new(self):
         with dpg.node(
             parent="MainNodeEditor",
-            tag="blur_" + str(self.counter),
-            label="Blur",
+            tag="GaussianBlur_" + str(self.counter),
+            label="Gaussian Blur",
             pos=find_available_pos(),
             user_data=self,
         ):
             dpg.add_node_attribute(attribute_type=dpg.mvNode_Attr_Input)
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
                 dpg.add_slider_int(
-                    tag="blur_percentage_" + str(self.counter),
+                    tag="blur_gaussian_percentage_" + str(self.counter),
                     width=150,
                     default_value=0,
                     max_value=500,
@@ -34,10 +34,10 @@ class BlurModule:
                     callback=self.update_output,
                 )
 
-        self.settings["blur_" + str(self.counter)] = {"blur_percentage_" + str(self.counter): 0}
+        self.settings["GaussianBlur_" + str(self.counter)] = {"blur_gaussian_percentage_" + str(self.counter): 0}
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         return image.filter(
-            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_percentage_" + tag.split("_")[1]] / 70)
+            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_gaussian_percentage_" + tag.split("_")[1]] / 70)
         )
