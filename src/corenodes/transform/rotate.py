@@ -9,6 +9,7 @@ class RotateModule:
     def __init__(self, update_output: callable):
         self.counter = 0
         self.update_output = update_output
+        self.settings = {}
 
     def new(self):
         with dpg.node(
@@ -29,6 +30,7 @@ class RotateModule:
                     callback=self.update_output,
                 )
 
+        self.settings["rotate_" + str(self.counter)] = {"rotate_degrees_" + str(self.counter): 0}
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
