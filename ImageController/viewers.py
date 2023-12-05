@@ -246,8 +246,8 @@ class ImageViewer(ImageViewerCreator):
 
         :param width: Viewer width. Used when the image is loaded in the viewer or another dimension is also set
         :param height: Viewer height. Used when the image is loaded in the viewer or another dimension is also set
-        :param unload_width: Viewer width, when the image is not yet loaded (or unloaded) from the viewer. Not used if the size is set (`width` and `height` is not None)
-        :param unload_height: Viewer height, when the image is not yet loaded (or unloaded) from the viewer. Not used if the size is set (`width` and `height` is not None)
+        :param unload_width: Viewer width, when the image is not yet loaded (or unloaded) from the viewer.
+        :param unload_height: Viewer height, when the image is not yet loaded (or unloaded) from the viewer.
         :param parent: Parent to add this item to. (runtime adding)
         """
         if width is not None:

@@ -20,7 +20,7 @@ class InputModule:
     def pick_image(self, path):
         try:
             image = Image.open(path)
-        except:
+        except Exception:
             return
 
         image = image.convert("RGBA")

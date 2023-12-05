@@ -237,11 +237,11 @@ class Controller(dict[ImageControllerTag, ImageController]):
         disable_work_in_threads: bool = False,
     ):
         """
-        :param max_inactive_time: Time in seconds after which the picture will be unloaded from the DPG/RAM, If last time visible is not updated
+        :param max_inactive_time: Time in seconds after which the picture will be unloaded from the DPG/RAM
         :param unloading_check_sleep_time: In this number of seconds the last visibility of the image will be checked
         :param number_image_loader_workers: Number of simultaneous loading of images
         :param queue_max_size: If not set, it will be equal to number_image_loader_workers * 2
-        :param disable_work_in_threads: Disables multi-threaded image un/loading, you have to use the `.load_images`/'.unload_images' function to un/load the images yourself
+        :param disable_work_in_threads: Disables multi-threaded image un/loading
         """
         super().__init__()
 

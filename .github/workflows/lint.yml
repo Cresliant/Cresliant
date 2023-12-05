@@ -26,4 +26,9 @@ jobs:
           poetry install --only dev
 
     - name: Run pre-commit hooks
-      run: export PIP_USER=0; poetry run pre-commit run --all-files
+      run: export PIP_USER=0; SKIP=flake8 poetry run pre-commit run --all-files
+
+    - name: Run flake8
+      run: "poetry run flake8 \
+        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
+        [flake8] %(code)s: %(text)s'"
