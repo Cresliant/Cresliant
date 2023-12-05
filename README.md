@@ -46,6 +46,9 @@ Cresliant is a powerful node-based image editor made in Python. It offers an eas
 
 ### 🔧 Installation
 
+You can either use one of the precompiled executables provided in the [releases](https://github.com/Cresliant/Cresliant/releases) or install and run locally:
+<br/><br/>
+
 1. Clone the Cresliant repository:
 ```sh
 git clone https://github.com/Cresliant/Cresliant
@@ -59,7 +62,7 @@ cd Cresliant
 3. Install the dependencies using poetry:
 ```sh
 pip install poetry
-poetry install
+poetry install --no-root
 ```
 
 ### 🤖 Running Cresliant
@@ -92,16 +95,20 @@ Contributions are welcome! Here are several ways you can contribute:
    ```sh
    git checkout -b new-feature-x
    ```
-4. **Make Your Changes**: Develop and test your changes locally.
-5. **Commit Your Changes**: Commit with a clear and concise message describing your updates.
+4. **Install Pre-commit Hooks**: So you don't forget to run them.
+   ```sh
+   poetry run pre-commit install
+   ```
+5. **Make Your Changes**: Develop and test your changes locally.
+6. **Commit Your Changes**: Commit with a clear and concise message describing your updates.
    ```sh
    git commit -m 'Implemented new feature x.'
    ```
-6. **Push to GitHub**: Push the changes to your forked repository.
+7. **Push to GitHub**: Push the changes to your forked repository.
    ```sh
    git push origin new-feature-x
    ```
-7. **Submit a Pull Request**: Create a PR against the original project repository. Clearly describe the changes and their motivations.
+8. **Submit a Pull Request**: Create a PR against the original project repository. Clearly describe the changes and their motivations.
 
 Once your PR is reviewed and approved, it will be merged into the main branch.
 
