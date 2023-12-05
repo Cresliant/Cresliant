@@ -1,7 +1,7 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image
 
-from src.utils import find_available_pos
+from src.utils import find_available_pos, theme
 
 
 class RotateModule:
@@ -31,6 +31,8 @@ class RotateModule:
                     format="%0.0f°",
                     callback=self.update_output,
                 )
+
+            dpg.bind_item_theme("rotate_" + str(self.counter), theme.green)
 
         self.settings["rotate_" + str(self.counter)] = {"rotate_degrees_" + str(self.counter): 0}
         self.counter += 1

@@ -1,7 +1,7 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image
 
-from src.utils import find_available_pos
+from src.utils import find_available_pos, theme
 
 
 class ResizeModule:
@@ -58,6 +58,8 @@ class ResizeModule:
                     format="%0.0f%%",
                     callback=self.update_output,
                 )
+
+            dpg.bind_item_theme("resize_" + str(self.counter), theme.blue)
 
         self.settings["resize_" + str(self.counter)] = {
             "width_size_" + str(self.counter): input_image.width,

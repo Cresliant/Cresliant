@@ -1,7 +1,7 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image, ImageFilter
 
-from src.utils import find_available_pos
+from src.utils import find_available_pos, theme
 
 
 class GaussianBlurModule:
@@ -34,10 +34,12 @@ class GaussianBlurModule:
                     callback=self.update_output,
                 )
 
+            dpg.bind_item_theme("GaussianBlur_" + str(self.counter), theme.green)
+
         self.settings["GaussianBlur_" + str(self.counter)] = {"blur_gaussian_percentage_" + str(self.counter): 0}
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         return image.filter(
-            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_gaussian_percentage_" + tag.split("_")[1]] / 70)
+            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_gaussian_percentage_" + tag.split("_")[1]] / 65)
         )

@@ -1,7 +1,7 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image, ImageEnhance
 
-from src.utils import find_available_pos
+from src.utils import find_available_pos, theme
 
 
 class BrightnessModule:
@@ -32,6 +32,8 @@ class BrightnessModule:
                     format="%0.0f%%",
                     callback=self.update_output,
                 )
+
+            dpg.bind_item_theme("brightness_" + str(self.counter), theme.yellow)
 
         self.settings["brightness_" + str(self.counter)] = {"brightness_percentage_" + str(self.counter): 0}
         self.counter += 1

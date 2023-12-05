@@ -98,8 +98,8 @@ def update_output(sender=None, app_data=None):
         dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
         return
 
-    image = Image.new("RGBA", (width, height))
-    for node in path[:-1]:
+    image = dpg.get_item_user_data("Input").image
+    for node in path[1:-1]:
         tag = dpg.get_item_alias(node)
         node = dpg.get_item_user_data(node)
         image = node.run(image, tag)

@@ -4,6 +4,7 @@ from dearpygui import dearpygui as dpg
 from PIL import Image
 
 import ImageController as dpg_img
+from src.utils import theme
 
 
 class InputModule:
@@ -53,5 +54,4 @@ class InputModule:
                     ),
                 )
 
-    def run(self, _image: Image.Image, _tag: str) -> Image.Image:
-        return self.image
+            dpg.bind_item_theme("Input", theme.red)

@@ -1,7 +1,7 @@
 from dearpygui import dearpygui as dpg
 from PIL import Image, ImageEnhance
 
-from src.utils import find_available_pos
+from src.utils import find_available_pos, theme
 
 
 class SharpnessModule:
@@ -32,6 +32,8 @@ class SharpnessModule:
                     format="%0.0f%%",
                     callback=self.update_output,
                 )
+
+            dpg.bind_item_theme("sharpness_" + str(self.counter), theme.blue)
 
         self.settings["sharpness_" + str(self.counter)] = {"sharpness_percentage_" + str(self.counter): 0}
         self.counter += 1

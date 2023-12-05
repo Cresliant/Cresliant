@@ -1,6 +1,7 @@
 from dearpygui import dearpygui as dpg
 
 import ImageController as dpg_img
+from src.utils import theme
 
 
 class OutputModule:
@@ -25,3 +26,5 @@ class OutputModule:
         ):
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
                 self.viewer = dpg_img.add_image(self.image)
+
+            dpg.bind_item_theme("Output", theme.red)
