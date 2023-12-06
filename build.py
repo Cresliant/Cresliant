@@ -16,7 +16,6 @@ args = [
     "main.py",
     "--name=Cresliant",
     "--add-data=assets/icon.ico;.",
-    "--add-data=assets/example.png;.",
     "--add-data=assets/Roboto-Regular.ttf;.",
     "--onefile",
     "--noconsole",

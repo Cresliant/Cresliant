@@ -3,8 +3,9 @@ from tkinter.filedialog import askopenfilename
 from dearpygui import dearpygui as dpg
 from PIL import Image
 
-import ImageController as dpg_img
+from src.utils import ImageController as dpg_img
 from src.utils import theme
+from src.utils.paths import resource_path
 
 
 class InputModule:
@@ -14,8 +15,10 @@ class InputModule:
     def __init__(self, image: Image.Image, update_output: callable):
         self.counter = 0
         self.image = image
+        self.image_path = resource_path("icon.ico")
         self.viewer = None
         self.update_output = update_output
+        self.protected = True
 
     def pick_image(self, path):
         try:
@@ -26,6 +29,7 @@ class InputModule:
         image = image.convert("RGBA")
         image.thumbnail((450, 450), Image.LANCZOS)
         self.image = image
+        self.image_path = path
         self.viewer.load(image)
         self.update_output()
 
@@ -54,4 +58,4 @@ class InputModule:
                     ),
                 )
 
-            dpg.bind_item_theme("Input", theme.red)
+        dpg.bind_item_theme("Input", theme.red)

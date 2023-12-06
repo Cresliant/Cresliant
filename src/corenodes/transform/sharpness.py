@@ -12,6 +12,7 @@ class SharpnessModule:
         self.counter = 0
         self.update_output = update_output
         self.settings = {}
+        self.protected = False
 
     def new(self):
         with dpg.node(
@@ -33,8 +34,7 @@ class SharpnessModule:
                     callback=self.update_output,
                 )
 
-            dpg.bind_item_theme("sharpness_" + str(self.counter), theme.blue)
-
+        dpg.bind_item_theme("sharpness_" + str(self.counter), theme.blue)
         self.settings["sharpness_" + str(self.counter)] = {"sharpness_percentage_" + str(self.counter): 0}
         self.counter += 1
 

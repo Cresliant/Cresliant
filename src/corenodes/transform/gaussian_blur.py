@@ -12,6 +12,7 @@ class GaussianBlurModule:
         self.counter = 0
         self.update_output = update_output
         self.settings = {}
+        self.protected = False
 
     def new(self):
         with dpg.node(
@@ -34,8 +35,7 @@ class GaussianBlurModule:
                     callback=self.update_output,
                 )
 
-            dpg.bind_item_theme("GaussianBlur_" + str(self.counter), theme.green)
-
+        dpg.bind_item_theme("GaussianBlur_" + str(self.counter), theme.green)
         self.settings["GaussianBlur_" + str(self.counter)] = {"blur_gaussian_percentage_" + str(self.counter): 0}
         self.counter += 1
 

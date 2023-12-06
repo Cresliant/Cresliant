@@ -1,6 +1,6 @@
 from dearpygui import dearpygui as dpg
 
-import ImageController as dpg_img
+from src.utils import ImageController as dpg_img
 from src.utils import theme
 
 
@@ -12,6 +12,7 @@ class OutputModule:
         self.counter = 0
         self.image = image
         self.viewer = None
+        self.protected = True
 
     def new(self):
         if dpg.does_item_exist("Output"):
@@ -27,4 +28,4 @@ class OutputModule:
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
                 self.viewer = dpg_img.add_image(self.image)
 
-            dpg.bind_item_theme("Output", theme.red)
+        dpg.bind_item_theme("Output", theme.red)

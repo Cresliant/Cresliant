@@ -12,6 +12,7 @@ class ResizeModule:
         self.counter = 0
         self.update_output = update_output
         self.settings = {}
+        self.protected = False
 
     def new(self):
         input_image = dpg.get_item_user_data("Input").image
@@ -59,8 +60,7 @@ class ResizeModule:
                     callback=self.update_output,
                 )
 
-            dpg.bind_item_theme("resize_" + str(self.counter), theme.blue)
-
+        dpg.bind_item_theme("resize_" + str(self.counter), theme.blue)
         self.settings["resize_" + str(self.counter)] = {
             "width_size_" + str(self.counter): input_image.width,
             "height_size_" + str(self.counter): input_image.height,
