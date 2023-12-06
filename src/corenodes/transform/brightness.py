@@ -2,17 +2,15 @@ from dearpygui import dearpygui as dpg
 from PIL import Image, ImageEnhance
 
 from src.utils import find_available_pos, theme
+from src.utils.nodes import NodeParent
 
 
-class BrightnessModule:
+class BrightnessModule(NodeParent):
     name = "Brightness"
     tooltip = "Adjust brightness"
 
     def __init__(self, update_output: callable):
-        self.counter = 0
-        self.update_output = update_output
-        self.settings = {}
-        self.protected = False
+        super().__init__(update_output)
 
     def new(self):
         with dpg.node(

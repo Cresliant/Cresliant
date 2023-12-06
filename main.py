@@ -1,4 +1,5 @@
 import os
+import sys
 import webbrowser
 from tkinter.filedialog import asksaveasfilename
 
@@ -21,14 +22,17 @@ with dpg.font_registry():
 
 def export():
     image = dpg.get_item_user_data("Output").image
-    image.save(
-        asksaveasfilename(
-            filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("BMP", "*.bmp")],
-            defaultextension=".png",
-            initialfile="output.png",
-            initialdir=os.curdir,
-        )
+    location = asksaveasfilename(
+        filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("BMP", "*.bmp")],
+        defaultextension=".png",
+        initialfile="output.png",
+        initialdir=os.curdir,
     )
+    image.save(location)
+    if sys.platform == "win32":
+        webbrowser.open(location)
+    else:
+        image.show()
 
 
 with dpg.window(
@@ -149,14 +153,7 @@ with dpg.window(
             dpg.add_menu_item(tag="version", label="Cresliant " + VERSION, enabled=False)
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
-
     node_editor.start()
-    for module in node_editor.modules[1:-1]:
-        with dpg.tooltip(parent=module.name):
-            dpg.add_text(module.tooltip)
-        with dpg.tooltip(parent=module.name + "_popup"):
-            dpg.add_text(module.tooltip)
-
 
 dpg.setup_dearpygui()
 dpg.show_viewport()

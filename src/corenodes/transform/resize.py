@@ -2,17 +2,15 @@ from dearpygui import dearpygui as dpg
 from PIL import Image
 
 from src.utils import find_available_pos, theme
+from src.utils.nodes import NodeParent
 
 
-class ResizeModule:
+class ResizeModule(NodeParent):
     name = "Resize"
     tooltip = "Resize image"
 
     def __init__(self, update_output: callable):
-        self.counter = 0
-        self.update_output = update_output
-        self.settings = {}
-        self.protected = False
+        super().__init__(update_output)
 
     def new(self):
         input_image = dpg.get_item_user_data("Input").image
@@ -53,7 +51,7 @@ class ResizeModule:
                     tag="resize_percentage_" + str(self.counter),
                     width=150,
                     default_value=100,
-                    max_value=200,
+                    max_value=500,
                     min_value=1,
                     clamped=True,
                     format="%0.0f%%",

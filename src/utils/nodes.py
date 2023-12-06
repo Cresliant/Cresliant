@@ -10,6 +10,14 @@ def find_available_pos() -> list[int]:
     return [0, 0]
 
 
+class NodeParent:
+    def __init__(self, update_output: callable):
+        self.counter = 0
+        self.update_output = update_output
+        self.settings = {}
+        self.protected = False
+
+
 class Theme:
     def __init__(self):
         self._cache = {}

@@ -33,6 +33,8 @@ class NodeEditor:
     modules = []
     _node_links = []
 
+    _project = None
+
     path = []
 
     def __init__(self, pillow_image: Image.Image):
@@ -183,6 +185,7 @@ class NodeEditor:
                 dpg.delete_item(node)
 
         self._node_links.clear()
+        self._project = None
 
         self.modules[0].new()
         self.modules[-1].new()
@@ -211,27 +214,29 @@ class NodeEditor:
                 }
             )
 
-        with open(
-            asksaveasfilename(
+        if self._project:
+            with open(self._project, "w") as file:
+                file.write(json.dumps(data))
+            return
+        else:
+            location = asksaveasfilename(
                 filetypes=[("Cresliant", "*.cresliant")],
                 defaultextension=".cresliant",
                 initialfile="project.cresliant",
                 initialdir=os.curdir,
-            ),
-            "w",
-        ) as file:
-            file.write(json.dumps(data))
+            )
+            with open(location, "w") as file:
+                file.write(json.dumps(data))
+
+            self._project = location
 
     def open(self):
         try:
-            data = json.load(
-                open(
-                    askopenfilename(
-                        filetypes=[("Cresliant", "*.cresliant")],
-                        initialdir=os.curdir,
-                    )
-                )
+            location = askopenfilename(
+                filetypes=[("Cresliant", "*.cresliant")],
+                initialdir=os.curdir,
             )
+            data = json.load(open(location))
         except FileNotFoundError:
             return
 
@@ -291,6 +296,7 @@ class NodeEditor:
             )
             self._node_links.append(Link(source=source, target=target, id=int(link)))
 
+        self._project = location
         self.update_path()
         self.update_output()
 
