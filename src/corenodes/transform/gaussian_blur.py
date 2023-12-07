@@ -42,5 +42,5 @@ class GaussianBlurModule(NodeParent):
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         return image.filter(
-            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_gaussian_percentage_" + tag.split("_")[1]] / 65)
+            ImageFilter.GaussianBlur(radius=self.settings[tag]["blur_gaussian_percentage_" + tag.split("_")[-1]] / 65)
         )

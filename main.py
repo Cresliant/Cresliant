@@ -138,8 +138,8 @@ with dpg.window(
             dpg.add_menu_item(tag="close", label="Quit", shortcut="Ctrl+Q", callback=dpg.stop_dearpygui)
 
         with dpg.menu(tag="edit", label="Edit"):
-            dpg.add_menu_item(label="Undo    ", tag="undo", shortcut="Ctrl+Z")
-            dpg.add_menu_item(label="Redo    ", tag="redo", shortcut="Ctrl+Y")
+            dpg.add_menu_item(label="Undo    ", tag="undo", shortcut="Ctrl+Z", callback=history_manager.undo)
+            dpg.add_menu_item(label="Redo    ", tag="redo", shortcut="Ctrl+Y", callback=history_manager.redo)
 
         with dpg.menu(tag="nodes", label="Nodes"):
             for module in node_editor.modules[1:]:
