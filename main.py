@@ -7,6 +7,7 @@ import dearpygui.dearpygui as dpg
 
 from src.editor import node_editor
 from src.utils import ImageController as dpg_img
+from src.utils.nodes import history_manager
 from src.utils.paths import resource_path
 
 VERSION = "v0.1.0"
@@ -73,9 +74,9 @@ def handle_shortcuts(_sender, app_data):
         case dpg.mvKey_Q:
             dpg.stop_dearpygui()
         case dpg.mvKey_Z:
-            print("Undo")
+            history_manager.undo()
         case dpg.mvKey_Y:
-            print("Redo")
+            history_manager.redo()
 
 
 def handle_popup(_sender, app_data):
@@ -111,9 +112,10 @@ with dpg.handler_registry():
     dpg.add_key_release_handler(key=dpg.mvKey_Y, callback=handle_shortcuts)
 
     # Dev tools
-    dpg.add_key_release_handler(key=dpg.mvKey_F10, callback=dpg.show_item_registry)
-    dpg.add_key_release_handler(key=dpg.mvKey_F11, callback=dpg.show_style_editor)
-    dpg.add_key_release_handler(key=dpg.mvKey_F12, callback=dpg.show_metrics)
+    if node_editor.debug:
+        dpg.add_key_release_handler(key=dpg.mvKey_F10, callback=dpg.show_item_registry)
+        dpg.add_key_release_handler(key=dpg.mvKey_F11, callback=dpg.show_style_editor)
+        dpg.add_key_release_handler(key=dpg.mvKey_F12, callback=dpg.show_metrics)
 
 
 with dpg.window(
@@ -154,6 +156,7 @@ with dpg.window(
 
     dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
     node_editor.start()
+
 
 dpg.setup_dearpygui()
 dpg.show_viewport()

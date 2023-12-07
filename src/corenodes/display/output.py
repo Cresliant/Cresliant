@@ -8,7 +8,7 @@ class OutputModule:
     name = "Output"
     tooltip = "Image output"
 
-    def __init__(self, image) -> None:
+    def __init__(self, image):
         self.counter = 0
         self.image = image
         self.viewer = None

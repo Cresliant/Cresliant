@@ -12,7 +12,7 @@ class ResizeModule(NodeParent):
     def __init__(self, update_output: callable):
         super().__init__(update_output)
 
-    def new(self):
+    def new(self, history=True):
         input_image = dpg.get_item_user_data("Input").image
 
         with dpg.node(
@@ -58,12 +58,15 @@ class ResizeModule(NodeParent):
                     callback=self.update_output,
                 )
 
-        dpg.bind_item_theme("resize_" + str(self.counter), theme.blue)
-        self.settings["resize_" + str(self.counter)] = {
+        tag = "resize_" + str(self.counter)
+        dpg.bind_item_theme(tag, theme.blue)
+        self.settings[tag] = {
             "width_size_" + str(self.counter): input_image.width,
             "height_size_" + str(self.counter): input_image.height,
             "resize_percentage_" + str(self.counter): 100,
         }
+        if history:
+            self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:

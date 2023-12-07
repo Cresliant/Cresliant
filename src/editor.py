@@ -4,7 +4,6 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 import dearpygui.dearpygui as dpg
 from PIL import Image
-from pydantic import BaseModel
 
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import (
@@ -15,20 +14,15 @@ from src.corenodes.transform import (
     RotateModule,
     SharpnessModule,
 )
+from src.utils.nodes import HistoryItem, Link, history_manager
 from src.utils.paths import resource_path
-
-
-class Link(BaseModel):
-    source: int
-    target: int
-    id: int
 
 
 class NodeEditor:
     _name = "Node Editor"
     _tag = "MainNodeEditor"
 
-    _debug = False
+    debug = True
 
     modules = []
     _node_links = []
@@ -50,6 +44,10 @@ class NodeEditor:
         ]
 
     def start(self):
+        history_manager.update_path = self.update_path
+        history_manager.update_output = self.update_output
+        history_manager.links = self._node_links
+
         with dpg.node_editor(
             tag=self._tag,
             callback=self.link_callback,
@@ -73,7 +71,7 @@ class NodeEditor:
                 data_ = dpg.get_item_user_data(node)
             except SystemError:
                 continue
-            if data_ and "input" in str(data_).lower():
+            if data_ and data_.name == "Input":
                 self.path.append(node)
                 break
 
@@ -93,7 +91,7 @@ class NodeEditor:
             if not found:
                 break
 
-    def update_output(self, sender=None, app_data=None):
+    def update_output(self, sender=None, app_data=None, history=True):
         if sender and app_data:
             try:
                 node = dpg.get_item_info(dpg.get_item_info(sender)["parent"])["parent"]
@@ -101,8 +99,16 @@ class NodeEditor:
             except SystemError:
                 return
 
-            module.settings[dpg.get_item_alias(node)][sender] = app_data
-
+            alias = dpg.get_item_alias(node)
+            if history or history is None:
+                history_manager.append(
+                    HistoryItem(
+                        tag=alias,
+                        action="update",
+                        data={sender: (app_data, module.settings[alias][sender])},
+                    )
+                )
+            module.settings[alias][sender] = app_data
         try:
             output = dpg.get_item_user_data(self.path[-1])
         except IndexError:
@@ -132,6 +138,17 @@ class NodeEditor:
 
         link = dpg.add_node_link(app_data[0], app_data[1], parent=sender)
         self._node_links.append(Link(source=app_data[0], target=app_data[1], id=int(link)))
+        history_manager.append(
+            HistoryItem(
+                tag=str(link),
+                action="link_create",
+                data={
+                    "source": app_data[0],
+                    "target": app_data[1],
+                    "id": link,
+                },
+            )
+        )
 
         self.update_path()
         self.update_output()
@@ -140,6 +157,17 @@ class NodeEditor:
         dpg.delete_item(app_data)
         for link in self._node_links:
             if link.id == app_data:
+                history_manager.append(
+                    HistoryItem(
+                        tag=str(app_data),
+                        action="link_delete",
+                        data={
+                            "source": link.source,
+                            "target": link.target,
+                            "id": link.id,
+                        },
+                    )
+                )
                 self._node_links.remove(link)
                 break
 
@@ -148,12 +176,28 @@ class NodeEditor:
 
     def delete_nodes(self, _sender, _app_data):
         for node in dpg.get_selected_nodes(self._tag):
-            if not dpg.get_item_user_data(node).protected:
-                node_links = dpg.get_item_info(node)["children"][1]
-                dpg.delete_item(node)
-                for link in self._node_links:
-                    if link.source in node_links or link.target in node_links:
-                        self._node_links.remove(link)
+            data = dpg.get_item_user_data(node)
+            if data.protected:
+                continue
+
+            node_links = dpg.get_item_info(node)["children"][1]
+            history_manager.append(
+                HistoryItem(
+                    tag=dpg.get_item_alias(node),
+                    action="delete",
+                    data={
+                        "user_data": data,
+                        "settings": data.settings[dpg.get_item_alias(node)],
+                        "pos": dpg.get_item_pos(node),
+                        "links": node_links,
+                    },
+                )
+            )
+
+            dpg.delete_item(node)
+            for link in self._node_links:
+                if link.source in node_links or link.target in node_links:
+                    self._node_links.remove(link)
 
         self.update_path()
         self.update_output()
@@ -163,6 +207,17 @@ class NodeEditor:
             dpg.delete_item(link)
             for link_ in self._node_links:
                 if link_.id == link:
+                    history_manager.append(
+                        HistoryItem(
+                            tag=str(link),
+                            action="link_delete",
+                            data={
+                                "source": link_.source,
+                                "target": link_.target,
+                                "id": link_.id,
+                            },
+                        )
+                    )
                     self._node_links.remove(link_)
                     break
 
@@ -185,6 +240,7 @@ class NodeEditor:
                 dpg.delete_item(node)
 
         self._node_links.clear()
+        history_manager.clear()
         self._project = None
 
         self.modules[0].new()
@@ -218,17 +274,17 @@ class NodeEditor:
             with open(self._project, "w") as file:
                 file.write(json.dumps(data))
             return
-        else:
-            location = asksaveasfilename(
-                filetypes=[("Cresliant", "*.cresliant")],
-                defaultextension=".cresliant",
-                initialfile="project.cresliant",
-                initialdir=os.curdir,
-            )
-            with open(location, "w") as file:
-                file.write(json.dumps(data))
 
-            self._project = location
+        location = asksaveasfilename(
+            filetypes=[("Cresliant", "*.cresliant")],
+            defaultextension=".cresliant",
+            initialfile="project.cresliant",
+            initialdir=os.curdir,
+        )
+        with open(location, "w") as file:
+            file.write(json.dumps(data))
+
+        self._project = location
 
     def open(self):
         try:

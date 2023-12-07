@@ -12,10 +12,10 @@ class GaussianBlurModule(NodeParent):
     def __init__(self, update_output: callable):
         super().__init__(update_output)
 
-    def new(self):
+    def new(self, history=True):
         with dpg.node(
             parent="MainNodeEditor",
-            tag="GaussianBlur_" + str(self.counter),
+            tag="gaussian_blur_" + str(self.counter),
             label="Gaussian Blur",
             pos=find_available_pos(),
             user_data=self,
@@ -33,8 +33,11 @@ class GaussianBlurModule(NodeParent):
                     callback=self.update_output,
                 )
 
-        dpg.bind_item_theme("GaussianBlur_" + str(self.counter), theme.green)
-        self.settings["GaussianBlur_" + str(self.counter)] = {"blur_gaussian_percentage_" + str(self.counter): 0}
+        tag = "gaussian_blur_" + str(self.counter)
+        dpg.bind_item_theme(tag, theme.green)
+        self.settings[tag] = {"blur_gaussian_percentage_" + str(self.counter): 0}
+        if history:
+            self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:

@@ -12,7 +12,7 @@ class SharpnessModule(NodeParent):
     def __init__(self, update_output: callable):
         super().__init__(update_output)
 
-    def new(self):
+    def new(self, history=True):
         with dpg.node(
             parent="MainNodeEditor",
             tag="sharpness_" + str(self.counter),
@@ -32,8 +32,11 @@ class SharpnessModule(NodeParent):
                     callback=self.update_output,
                 )
 
-        dpg.bind_item_theme("sharpness_" + str(self.counter), theme.blue)
-        self.settings["sharpness_" + str(self.counter)] = {"sharpness_percentage_" + str(self.counter): 0}
+        tag = "sharpness_" + str(self.counter)
+        dpg.bind_item_theme(tag, theme.blue)
+        self.settings[tag] = {"sharpness_percentage_" + str(self.counter): 0}
+        if history:
+            self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:

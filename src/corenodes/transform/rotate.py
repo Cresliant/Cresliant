@@ -12,7 +12,7 @@ class RotateModule(NodeParent):
     def __init__(self, update_output: callable):
         super().__init__(update_output)
 
-    def new(self):
+    def new(self, history=True):
         with dpg.node(
             parent="MainNodeEditor",
             tag="rotate_" + str(self.counter),
@@ -31,8 +31,11 @@ class RotateModule(NodeParent):
                     callback=self.update_output,
                 )
 
-        dpg.bind_item_theme("rotate_" + str(self.counter), theme.green)
-        self.settings["rotate_" + str(self.counter)] = {"rotate_degrees_" + str(self.counter): 0}
+        tag = "rotate_" + str(self.counter)
+        dpg.bind_item_theme(tag, theme.green)
+        self.settings[tag] = {"rotate_degrees_" + str(self.counter): 0}
+        if history:
+            self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:

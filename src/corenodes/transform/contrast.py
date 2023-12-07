@@ -12,7 +12,7 @@ class ContrastModule(NodeParent):
     def __init__(self, update_output: callable):
         super().__init__(update_output)
 
-    def new(self):
+    def new(self, history=True):
         with dpg.node(
             parent="MainNodeEditor",
             tag="contrast_" + str(self.counter),
@@ -32,8 +32,11 @@ class ContrastModule(NodeParent):
                     callback=self.update_output,
                 )
 
-        dpg.bind_item_theme("contrast_" + str(self.counter), theme.yellow)
-        self.settings["contrast_" + str(self.counter)] = {"contrast_percentage_" + str(self.counter): 0}
+        tag = "contrast_" + str(self.counter)
+        dpg.bind_item_theme(tag, theme.yellow)
+        self.settings[tag] = {"contrast_percentage_" + str(self.counter): 0}
+        if history:
+            self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
