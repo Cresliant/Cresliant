@@ -1,3 +1,4 @@
+from .blur import BlurModule
 from .brightness import BrightnessModule
 from .contrast import ContrastModule
 from .crop import CropModule

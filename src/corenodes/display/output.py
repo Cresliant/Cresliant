@@ -1,6 +1,6 @@
 from dearpygui import dearpygui as dpg
+from PIL import Image
 
-from src.utils import ImageController as dpg_img
 from src.utils import theme
 
 
@@ -11,7 +11,7 @@ class OutputModule:
     def __init__(self, image):
         self.counter = 0
         self.image = image
-        self.viewer = None
+        self.pillow_image = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
         self.protected = True
 
     def new(self):
@@ -25,7 +25,7 @@ class OutputModule:
             pos=[800, 100],
             user_data=self,
         ):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
-                self.viewer = dpg_img.add_image(self.image)
+            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input, tag="Output_attribute"):
+                dpg.add_image(self.image)
 
         dpg.bind_item_theme("Output", theme.red)

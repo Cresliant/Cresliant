@@ -25,7 +25,9 @@ class RotateModule(NodeParent):
                 dpg.add_slider_int(
                     tag="rotate_degrees_" + str(self.counter),
                     width=150,
+                    min_value=1,
                     max_value=360,
+                    default_value=360,
                     clamped=True,
                     format="%0.0f°",
                     callback=self.update_output,
@@ -33,10 +35,11 @@ class RotateModule(NodeParent):
 
         tag = "rotate_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.green)
-        self.settings[tag] = {"rotate_degrees_" + str(self.counter): 0}
+        self.settings[tag] = {"rotate_degrees_" + str(self.counter): 1}
         if history:
             self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
+        print(self.settings[tag]["rotate_degrees_" + tag.split("_")[1]])
         return image.rotate(self.settings[tag]["rotate_degrees_" + tag.split("_")[1]])

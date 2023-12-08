@@ -3,19 +3,20 @@ import os
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 import dearpygui.dearpygui as dpg
+import numpy as np
 from PIL import Image
 
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import (
+    BlurModule,
     BrightnessModule,
     ContrastModule,
-    CropModule,
-    FlipHorizontallyModule,
-    GaussianBlurModule,
-    OpacityModule,
     ResizeModule,
     RotateModule,
     SharpnessModule,
+    OpacityModule,
+    CropModule,
+    FlipHorizontallyModule,
 )
 from src.utils.nodes import HistoryItem, Link, history_manager
 from src.utils.paths import resource_path
@@ -39,7 +40,7 @@ class NodeEditor:
             InputModule(pillow_image, self.update_output),
             ResizeModule(self.update_output),
             RotateModule(self.update_output),
-            GaussianBlurModule(self.update_output),
+            BlurModule(self.update_output),
             BrightnessModule(self.update_output),
             ContrastModule(self.update_output),
             SharpnessModule(self.update_output),
@@ -47,6 +48,7 @@ class NodeEditor:
             CropModule(self.update_output),
             FlipHorizontallyModule(self.update_output),
             OutputModule(Image.new("RGBA", pillow_image.size)),
+            OutputModule("output_0"),
         ]
 
     def start(self):
@@ -118,10 +120,10 @@ class NodeEditor:
         try:
             output = dpg.get_item_user_data(self.path[-1])
         except IndexError:
-            dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
+            dpg.delete_item("Output_attribute", children_only=True)
             return
-        if "output" not in str(output).lower():
-            dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
+        if output.name != "Output":
+            dpg.delete_item("Output_attribute", children_only=True)
             return
 
         image = dpg.get_item_user_data("Input").image
@@ -130,8 +132,24 @@ class NodeEditor:
             node = dpg.get_item_user_data(node)
             image = node.run(image, tag)
 
-        output.viewer.load(image)
-        output.image = image
+        dpg.delete_item(output.image)
+        try:
+            dpg.remove_alias(output.image)
+        except SystemError:
+            pass
+
+        counter = output.image.split("_")[-1]
+        output.image = "output_" + str(int(counter) + 1)
+        output.pillow_image = image
+        with dpg.texture_registry():
+            dpg.add_static_texture(
+                image.width,
+                image.height,
+                np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0,
+                tag=output.image,
+            )
+        dpg.delete_item("Output_attribute", children_only=True)
+        dpg.add_image(output.image, parent="Output_attribute")
 
     def link_callback(self, sender, app_data):
         for link in self._node_links:
