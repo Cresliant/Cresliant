@@ -5,7 +5,7 @@ from src.utils import find_available_pos, theme
 from src.utils.nodes import NodeParent
 
 
-class FlipHorizontallyModule(NodeParent):
+class FlipModule(NodeParent):
     name = "Flip Horizontaly"
     tooltip = "Flip image"
 
@@ -13,8 +13,6 @@ class FlipHorizontallyModule(NodeParent):
         super().__init__(update_output)
 
     def new(self, history=True):
-        input_image = dpg.get_item_user_data("Input").image
-
         with dpg.node(
             parent="MainNodeEditor",
             tag="flip_" + str(self.counter),
