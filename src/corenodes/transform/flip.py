@@ -6,7 +6,7 @@ from src.utils.nodes import NodeParent
 
 
 class FlipModule(NodeParent):
-    name = "Flip Horizontaly"
+    name = "Flip"
     tooltip = "Flip image"
 
     def __init__(self, update_output: callable):
@@ -22,15 +22,28 @@ class FlipModule(NodeParent):
         ):
             dpg.add_node_attribute(attribute_type=dpg.mvNode_Attr_Input)
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
-                dpg.add_text("This will flip the image")
+                dpg.add_combo(
+                    tag="flip_mode_" + str(self.counter),
+                    label="Direction",
+                    items=["Horizontal", "Vertical", "Diagonal"],
+                    default_value="Horizontal",
+                    width=150,
+                    callback=self.update_output,
+                )
 
-        tag = "resize_" + str(self.counter)
-        dpg.bind_item_theme(tag, theme.blue)
-        self.settings[tag] = {None}
+        tag = "flip_" + str(self.counter)
+        dpg.bind_item_theme(tag, theme.yellow)
+        self.settings[tag] = {"flip_mode_" + str(self.counter): "Horizontal"}
         if history:
             self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
-        tag = tag.split("_")[-1]
-        return image.transpose(Image.FLIP_LEFT_RIGHT)
+        mode_tag = "flip_mode_" + tag.split("_")[-1]
+        if self.settings[tag][mode_tag] == "Horizontal":
+            return image.transpose(Image.FLIP_LEFT_RIGHT)
+        elif self.settings[tag][mode_tag] == "Vertical":
+            return image.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            return image.transpose(Image.FLIP_TOP_BOTTOM)

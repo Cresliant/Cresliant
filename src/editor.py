@@ -47,7 +47,6 @@ class NodeEditor:
             OpacityModule(self.update_output),
             CropModule(self.update_output),
             FlipModule(self.update_output),
-            OutputModule(Image.new("RGBA", pillow_image.size)),
             OutputModule("output_0"),
         ]
 

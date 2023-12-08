@@ -25,31 +25,31 @@ class OpacityModule(NodeParent):
                 dpg.add_slider_int(
                     tag="opacity_percentage_" + str(self.counter),
                     width=150,
-                    default_value=0,
-                    max_value=255,
-                    min_value=0,
+                    default_value=100,
+                    max_value=100,
+                    min_value=-1,
                     clamped=True,
                     format="%0.0f%%",
                     callback=self.update_output,
                 )
 
         tag = "opacity_" + str(self.counter)
-        dpg.bind_item_theme(tag, theme.green)
+        dpg.bind_item_theme(tag, theme.yellow)
         self.settings[tag] = {"opacity_percentage_" + str(self.counter): 255}
         if history:
             self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
-        tag = tag.split("_")[-1]
-        percent = self.settings["opacity_" + tag]["opacity_percentage_" + tag]
-
+        image.putalpha(self.settings[tag]["opacity_percentage_" + tag.split("_")[-1]] * 255 // 100)
+        image = image.convert("RGBA")
         datas = image.getdata()
-
         newData = []
         for item in datas:
-            # Preserve the original RGB values and only change the alpha value
-            newData.append((item[0], item[1], item[2], percent))
+            if item[0] == 0 and item[1] == 0 and item[2] == 0:
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
 
         image.putdata(newData)
         return image
