@@ -3,6 +3,7 @@ import os
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 import dearpygui.dearpygui as dpg
+import numpy as np
 from PIL import Image
 
 from src.corenodes.display import InputModule, OutputModule
@@ -40,7 +41,7 @@ class NodeEditor:
             BrightnessModule(self.update_output),
             ContrastModule(self.update_output),
             SharpnessModule(self.update_output),
-            OutputModule(Image.new("RGBA", pillow_image.size)),
+            OutputModule("output_0"),
         ]
 
     def start(self):
@@ -112,10 +113,10 @@ class NodeEditor:
         try:
             output = dpg.get_item_user_data(self.path[-1])
         except IndexError:
-            dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
+            dpg.delete_item("Output_attribute", children_only=True)
             return
-        if "output" not in str(output).lower():
-            dpg.get_item_user_data("Output").viewer.load(Image.new("RGBA", dpg.get_item_user_data("Input").image.size))
+        if output.name != "Output":
+            dpg.delete_item("Output_attribute", children_only=True)
             return
 
         image = dpg.get_item_user_data("Input").image
@@ -124,8 +125,23 @@ class NodeEditor:
             node = dpg.get_item_user_data(node)
             image = node.run(image, tag)
 
-        output.viewer.load(image)
-        output.image = image
+        dpg.delete_item(output.image)
+        try:
+            dpg.remove_alias(output.image)
+        except SystemError:
+            pass
+
+        counter = output.image.split("_")[-1]
+        output.image = "output_" + str(int(counter) + 1)
+        with dpg.texture_registry():
+            dpg.add_static_texture(
+                image.width,
+                image.height,
+                np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0,
+                tag=output.image,
+            )
+        dpg.delete_item("Output_attribute", children_only=True)
+        dpg.add_image(output.image, parent="Output_attribute")
 
     def link_callback(self, sender, app_data):
         for link in self._node_links:

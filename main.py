@@ -20,6 +20,9 @@ with dpg.font_registry():
     dpg.add_font(resource_path("Roboto-Regular.ttf"), 17, tag="font")
     dpg.bind_font("font")
 
+with dpg.texture_registry():
+    dpg.add_static_texture(1, 1, [0] * 1 * 1 * 4, tag="output_0")
+
 
 def export():
     image = dpg.get_item_user_data("Output").image

@@ -26,7 +26,8 @@ class ContrastModule(NodeParent):
                     tag="contrast_percentage_" + str(self.counter),
                     width=150,
                     max_value=100,
-                    min_value=0,
+                    min_value=1,
+                    default_value=1,
                     clamped=True,
                     format="%0.0f%%",
                     callback=self.update_output,
@@ -34,7 +35,7 @@ class ContrastModule(NodeParent):
 
         tag = "contrast_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.yellow)
-        self.settings[tag] = {"contrast_percentage_" + str(self.counter): 0}
+        self.settings[tag] = {"contrast_percentage_" + str(self.counter): 1}
         if history:
             self.update_history(tag)
         self.counter += 1

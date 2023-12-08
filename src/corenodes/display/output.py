@@ -11,7 +11,6 @@ class OutputModule:
     def __init__(self, image):
         self.counter = 0
         self.image = image
-        self.viewer = None
         self.protected = True
 
     def new(self):
@@ -25,7 +24,7 @@ class OutputModule:
             pos=[800, 100],
             user_data=self,
         ):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
-                self.viewer = dpg_img.add_image(self.image)
+            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input, tag="Output_attribute"):
+                dpg.add_image(self.image)
 
         dpg.bind_item_theme("Output", theme.red)

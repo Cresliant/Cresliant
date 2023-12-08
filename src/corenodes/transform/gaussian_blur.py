@@ -25,9 +25,9 @@ class GaussianBlurModule(NodeParent):
                 dpg.add_slider_int(
                     tag="blur_gaussian_percentage_" + str(self.counter),
                     width=150,
-                    default_value=0,
+                    default_value=1,
                     max_value=500,
-                    min_value=0,
+                    min_value=1,
                     clamped=True,
                     format="%0.0f%%",
                     callback=self.update_output,
@@ -35,7 +35,7 @@ class GaussianBlurModule(NodeParent):
 
         tag = "gaussian_blur_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.green)
-        self.settings[tag] = {"blur_gaussian_percentage_" + str(self.counter): 0}
+        self.settings[tag] = {"blur_gaussian_percentage_" + str(self.counter): 1}
         if history:
             self.update_history(tag)
         self.counter += 1

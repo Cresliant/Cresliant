@@ -51,7 +51,7 @@ class ResizeModule(NodeParent):
                     tag="resize_percentage_" + str(self.counter),
                     width=150,
                     default_value=100,
-                    max_value=500,
+                    max_value=300,
                     min_value=1,
                     clamped=True,
                     format="%0.0f%%",
