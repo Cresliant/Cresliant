@@ -3,8 +3,6 @@ from PIL import Image
 
 from src.utils import find_available_pos, theme
 from src.utils.nodes import NodeParent
-from PIL import Image
-
 
 
 class OpacityModule(NodeParent):

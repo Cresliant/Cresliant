@@ -10,10 +10,12 @@ from src.corenodes.transform import (
     BrightnessModule,
     ContrastModule,
     GaussianBlurModule,
+    OpacityModule,
     ResizeModule,
     RotateModule,
-    OpacityModule,
     SharpnessModule,
+    FlipHorizontallyModule,
+    CropModule,
 )
 from src.utils.nodes import HistoryItem, Link, history_manager
 from src.utils.paths import resource_path
@@ -42,6 +44,8 @@ class NodeEditor:
             ContrastModule(self.update_output),
             SharpnessModule(self.update_output),
             OpacityModule(self.update_output),
+            CropModule(self.update_output),
+            FlipHorizontallyModule(self.update_output),
             OutputModule(Image.new("RGBA", pillow_image.size)),
         ]
 
