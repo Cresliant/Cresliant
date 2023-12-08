@@ -9,13 +9,13 @@ from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import (
     BrightnessModule,
     ContrastModule,
+    CropModule,
+    FlipHorizontallyModule,
     GaussianBlurModule,
     OpacityModule,
     ResizeModule,
     RotateModule,
     SharpnessModule,
-    FlipHorizontallyModule,
-    CropModule,
 )
 from src.utils.nodes import HistoryItem, Link, history_manager
 from src.utils.paths import resource_path
