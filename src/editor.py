@@ -8,9 +8,9 @@ from PIL import Image
 
 from src.corenodes.display import InputModule, OutputModule
 from src.corenodes.transform import (
+    BlurModule,
     BrightnessModule,
     ContrastModule,
-    GaussianBlurModule,
     ResizeModule,
     RotateModule,
     SharpnessModule,
@@ -37,7 +37,7 @@ class NodeEditor:
             InputModule(pillow_image, self.update_output),
             ResizeModule(self.update_output),
             RotateModule(self.update_output),
-            GaussianBlurModule(self.update_output),
+            BlurModule(self.update_output),
             BrightnessModule(self.update_output),
             ContrastModule(self.update_output),
             SharpnessModule(self.update_output),
@@ -133,6 +133,7 @@ class NodeEditor:
 
         counter = output.image.split("_")[-1]
         output.image = "output_" + str(int(counter) + 1)
+        output.pillow_image = image
         with dpg.texture_registry():
             dpg.add_static_texture(
                 image.width,

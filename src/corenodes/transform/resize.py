@@ -25,7 +25,7 @@ class ResizeModule(NodeParent):
             with dpg.node_attribute():
                 dpg.add_input_int(
                     tag="width_size_" + str(self.counter),
-                    label="width",
+                    label="Width",
                     width=100,
                     default_value=input_image.width,
                     min_value=1,
@@ -36,7 +36,7 @@ class ResizeModule(NodeParent):
                 )
                 dpg.add_input_int(
                     tag="height_size_" + str(self.counter),
-                    label="height",
+                    label="Height",
                     width=100,
                     min_value=1,
                     min_clamped=True,

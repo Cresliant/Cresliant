@@ -23,22 +23,6 @@ with dpg.font_registry():
 with dpg.texture_registry():
     dpg.add_static_texture(1, 1, [0] * 1 * 1 * 4, tag="output_0")
 
-
-def export():
-    image = dpg.get_item_user_data("Output").image
-    location = asksaveasfilename(
-        filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("BMP", "*.bmp")],
-        defaultextension=".png",
-        initialfile="output.png",
-        initialdir=os.curdir,
-    )
-    image.save(location)
-    if sys.platform == "win32":
-        webbrowser.open(location)
-    else:
-        image.show()
-
-
 with dpg.window(
     tag="popup_window",
     no_move=True,
@@ -58,31 +42,45 @@ with dpg.window(
     dpg.add_button(label="Delete node", callback=node_editor.delete_nodes)
     dpg.add_button(label="Duplicate node", callback=node_editor.duplicate_nodes)
 
+with dpg.window(
+    tag="manual_modal",
+    modal=True,
+    no_move=True,
+    no_resize=True,
+    no_collapse=True,
+    show=False,
+    label="Manual",
+    pos=[dpg.get_viewport_width() // 2 - 100, dpg.get_viewport_height() // 2 - 100],
+):
+    dpg.add_text("To delete a node/link, select it and press the delete key.", bullet=True)
+    dpg.add_text("To add a node, right click anywhere on the canvas or select it from the Nodes menu.", bullet=True)
+    dpg.add_text("To add a link, drag from an output to an input.", bullet=True)
+    dpg.add_text("To duplicate nodes, select them and press Ctrl+V.", bullet=True)
+    dpg.add_text("To undo/redo, press Ctrl+Z/Ctrl+Y.", bullet=True)
+    dpg.add_text("To export the output, press Ctrl+E.", bullet=True)
 
-def handle_shortcuts(_sender, app_data):
-    if not dpg.is_key_down(dpg.mvKey_Control):
+
+def export():
+    image = dpg.get_item_user_data("Output").pillow_image
+    location = asksaveasfilename(
+        filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("BMP", "*.bmp")],
+        defaultextension=".png",
+        initialfile="output.png",
+        initialdir=os.curdir,
+    )
+    try:
+        image.save(location)
+    except ValueError:
         return
-
-    match app_data:
-        case dpg.mvKey_V:
-            node_editor.duplicate_nodes()
-        case dpg.mvKey_N:
-            node_editor.reset()
-        case dpg.mvKey_E:
-            export()
-        case dpg.mvKey_S:
-            node_editor.save()
-        case dpg.mvKey_O:
-            node_editor.open()
-        case dpg.mvKey_Q:
-            dpg.stop_dearpygui()
-        case dpg.mvKey_Z:
-            history_manager.undo()
-        case dpg.mvKey_Y:
-            history_manager.redo()
+    if sys.platform == "win32":
+        webbrowser.open(location)
+    else:
+        image.show()
 
 
 def handle_popup(_sender, app_data):
+    if app_data == 0 and not dpg.is_item_hovered("manual_modal"):
+        dpg.hide_item("manual_modal")
     if app_data == 1 and dpg.is_item_hovered("MainNodeEditor"):
         if len(dpg.get_selected_nodes("MainNodeEditor")) != 0:
             dpg.focus_item("node_popup_window")
@@ -98,6 +96,30 @@ def handle_popup(_sender, app_data):
         dpg.hide_item("node_popup_window")
 
 
+actions = {
+    dpg.mvKey_V: node_editor.duplicate_nodes,
+    dpg.mvKey_N: node_editor.reset,
+    dpg.mvKey_E: export,
+    dpg.mvKey_S: node_editor.save,
+    dpg.mvKey_O: node_editor.open,
+    dpg.mvKey_Q: dpg.stop_dearpygui,
+    dpg.mvKey_H: lambda: dpg.show_item("manual_modal"),
+    dpg.mvKey_G: lambda: webbrowser.open("https://github.com/Cresliant/Cresliant"),
+    dpg.mvKey_B: lambda: webbrowser.open("https://github.com/Cresliant/Cresliant/issues/new/choose"),
+    dpg.mvKey_Z: history_manager.undo,
+    dpg.mvKey_Y: history_manager.redo,
+}
+
+
+def handle_shortcuts(_sender, app_data):
+    if not dpg.is_key_down(dpg.mvKey_Control):
+        return
+
+    action = actions.get(app_data)
+    if action:
+        action()
+
+
 with dpg.handler_registry():
     dpg.add_mouse_click_handler(button=1, callback=handle_popup)
     dpg.add_mouse_release_handler(button=0, callback=handle_popup)
@@ -105,16 +127,9 @@ with dpg.handler_registry():
     dpg.add_key_press_handler(key=dpg.mvKey_Delete, callback=node_editor.delete_nodes)
     dpg.add_key_press_handler(key=dpg.mvKey_Delete, callback=node_editor.delete_links)
 
-    dpg.add_key_release_handler(key=dpg.mvKey_V, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_N, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_E, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_S, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_O, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_Q, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_Z, callback=handle_shortcuts)
-    dpg.add_key_release_handler(key=dpg.mvKey_Y, callback=handle_shortcuts)
+    for key in actions.keys():
+        dpg.add_key_release_handler(key=key, callback=handle_shortcuts)
 
-    # Dev tools
     if node_editor.debug:
         dpg.add_key_release_handler(key=dpg.mvKey_F10, callback=dpg.show_item_registry)
         dpg.add_key_release_handler(key=dpg.mvKey_F11, callback=dpg.show_style_editor)
@@ -148,16 +163,29 @@ with dpg.window(
             for module in node_editor.modules[1:]:
                 dpg.add_menu_item(tag=module.name, label=module.name, callback=module.new)
 
-        with dpg.menu(tag="about", label="About"):
+        with dpg.menu(tag="help", label="Help"):
+            dpg.add_menu_item(
+                tag="manual",
+                label="View the manual     ",
+                shortcut="Ctrl+H",
+                callback=lambda: dpg.show_item("manual_modal"),
+            )
             dpg.add_menu_item(
                 tag="github",
-                label="View it on Github",
+                label="Visit Github",
+                shortcut="Ctrl+G",
                 callback=lambda: webbrowser.open("https://github.com/Cresliant/Cresliant"),
+            )
+            dpg.add_menu_item(
+                tag="report",
+                label="Report a bug",
+                shortcut="Ctrl+B",
+                callback=lambda: webbrowser.open("https://github.com/Cresliant/Cresliant/issues/new/choose"),
             )
             dpg.add_separator()
             dpg.add_menu_item(tag="version", label="Cresliant " + VERSION, enabled=False)
 
-    dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
+    dpg.add_text("For help with using Cresliant, press Ctrl+H.", bullet=True)
     node_editor.start()
 
 
