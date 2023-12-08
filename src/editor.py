@@ -11,6 +11,9 @@ from src.corenodes.transform import (
     BlurModule,
     BrightnessModule,
     ContrastModule,
+    CropModule,
+    FlipModule,
+    OpacityModule,
     ResizeModule,
     RotateModule,
     SharpnessModule,
@@ -41,6 +44,9 @@ class NodeEditor:
             BrightnessModule(self.update_output),
             ContrastModule(self.update_output),
             SharpnessModule(self.update_output),
+            OpacityModule(self.update_output),
+            CropModule(self.update_output),
+            FlipModule(self.update_output),
             OutputModule("output_0"),
         ]
 
