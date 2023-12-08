@@ -12,6 +12,7 @@ from src.corenodes.transform import (
     GaussianBlurModule,
     ResizeModule,
     RotateModule,
+    OpacityModule,
     SharpnessModule,
 )
 from src.utils.nodes import HistoryItem, Link, history_manager
@@ -40,6 +41,7 @@ class NodeEditor:
             BrightnessModule(self.update_output),
             ContrastModule(self.update_output),
             SharpnessModule(self.update_output),
+            OpacityModule(self.update_output),
             OutputModule(Image.new("RGBA", pillow_image.size)),
         ]
 
