@@ -19,6 +19,8 @@ flake8 = "^6.0.0"
 pre-commit = "^3.3.2"
 pyinstaller = "^6.2.0"
 pytest = "^7.4.3"
+dearpygui = "^1.10.1"
+pillow = "^10.1.0"
 
 [build-system]
 requires = ["poetry-core"]
