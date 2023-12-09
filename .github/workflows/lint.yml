@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies using poetry
       run: |
           pip install poetry
-          poetry install --only dev --no-root
+          poetry install --no-root
 
     - name: Run pre-commit hooks
       run: export PIP_USER=0; SKIP=flake8 poetry run pre-commit run --all-files
