@@ -1,6 +1,16 @@
 repos:
   - repo: local
     hooks:
+      - id: pytest-check
+        name: pytest-check
+        entry: pytest
+        language: system
+        types: [ python ]
+        pass_filenames: false
+        always_run: true
+
+  - repo: local
+    hooks:
       - id: black
         name: black
         entry: black --check .

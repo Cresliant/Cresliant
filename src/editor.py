@@ -26,7 +26,7 @@ class NodeEditor:
     _name = "Node Editor"
     _tag = "MainNodeEditor"
 
-    debug = True
+    debug = False
 
     modules = []
     _node_links = []
@@ -126,6 +126,7 @@ class NodeEditor:
             return
 
         image = dpg.get_item_user_data("Input").image
+        img_size = image.size
         for node in self.path[1:-1]:
             tag = dpg.get_item_alias(node)
             node = dpg.get_item_user_data(node)
@@ -139,7 +140,8 @@ class NodeEditor:
 
         counter = output.image.split("_")[-1]
         output.image = "output_" + str(int(counter) + 1)
-        output.pillow_image = image
+        output.pillow_image = image.copy()
+        image.thumbnail((450, 450), Image.LANCZOS)
         with dpg.texture_registry():
             dpg.add_static_texture(
                 image.width,
@@ -149,6 +151,11 @@ class NodeEditor:
             )
         dpg.delete_item("Output_attribute", children_only=True)
         dpg.add_image(output.image, parent="Output_attribute")
+        if output.pillow_image.size != img_size:
+            dpg.add_spacer(height=5, parent="Output_attribute")
+            dpg.add_text(
+                f"Image size: {output.pillow_image.width}x{output.pillow_image.height}", parent="Output_attribute"
+            )
 
     def link_callback(self, sender, app_data):
         for link in self._node_links:
@@ -259,8 +266,11 @@ class NodeEditor:
                 data_ = dpg.get_item_user_data(node)
             except SystemError:
                 continue
-            if data_ and not data_.protected:
-                dpg.delete_item(node)
+            try:
+                if data_ and not data_.protected:
+                    dpg.delete_item(node)
+            except AttributeError:
+                continue
 
         self._node_links.clear()
         history_manager.clear()
@@ -304,8 +314,11 @@ class NodeEditor:
             initialfile="project.cresliant",
             initialdir=os.curdir,
         )
-        with open(location, "w") as file:
-            file.write(json.dumps(data))
+        try:
+            with open(location, "w") as file:
+                file.write(json.dumps(data))
+        except FileNotFoundError:
+            return
 
         self._project = location
 
@@ -349,9 +362,11 @@ class NodeEditor:
 
         try:
             image = Image.open(data["image"])
-            self.modules[0].viewer.load(image)
-            self.modules[0].image = image
+            image = image.convert("RGBA")
+            self.modules[0].image = image.copy()
             self.modules[0].image_path = data["image"]
+            image.thumbnail((450, 450), Image.LANCZOS)
+            self.modules[0].viewer.load(image)
         except FileNotFoundError:
             pass
 

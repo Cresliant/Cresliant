@@ -1,5 +1,5 @@
 from dearpygui import dearpygui as dpg
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 from src.utils import find_available_pos, theme
 from src.utils.nodes import NodeParent
@@ -35,21 +35,16 @@ class OpacityModule(NodeParent):
 
         tag = "opacity_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.yellow)
-        self.settings[tag] = {"opacity_percentage_" + str(self.counter): 255}
+        self.settings[tag] = {"opacity_percentage_" + str(self.counter): 100}
         if history:
             self.update_history(tag)
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
-        image.putalpha(self.settings[tag]["opacity_percentage_" + tag.split("_")[-1]] * 255 // 100)
-        image = image.convert("RGBA")
-        datas = image.getdata()
-        newData = []
-        for item in datas:
-            if item[0] == 0 and item[1] == 0 and item[2] == 0:
-                newData.append((255, 255, 255, 0))
-            else:
-                newData.append(item)
-
-        image.putdata(newData)
+        image = image.copy()
+        alpha = image.split()[3]
+        alpha = ImageEnhance.Brightness(alpha).enhance(
+            self.settings[tag]["opacity_percentage_" + tag.split("_")[-1]] / 100
+        )
+        image.putalpha(alpha)
         return image

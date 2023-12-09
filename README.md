@@ -62,7 +62,7 @@ cd Cresliant
 3. Install the dependencies using poetry:
 ```sh
 pip install poetry
-poetry install --no-root
+poetry install --no-root --without dev
 ```
 
 ### 🤖 Running Cresliant

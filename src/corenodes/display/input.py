@@ -27,9 +27,9 @@ class InputModule:
             return
 
         image = image.convert("RGBA")
-        image.thumbnail((450, 450), Image.LANCZOS)
-        self.image = image
+        self.image = image.copy()
         self.image_path = path
+        image.thumbnail((450, 450), Image.LANCZOS)
         self.viewer.load(image)
         self.update_output()
 
