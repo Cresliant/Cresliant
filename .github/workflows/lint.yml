@@ -1,0 +1,37 @@
+name: Pylint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies using poetry
+      run: |
+          pip install poetry
+          poetry install --no-root
+
+    - name: Run pre-commit hooks
+      run: |
+          $Env:PIP_USER=0
+          $Env:SKIP='flake8'
+          poetry run pre-commit run --all-files
+
+    - name: Run flake8
+      run: |
+          poetry run flake8 `
+            --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'
