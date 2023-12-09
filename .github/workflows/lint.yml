@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -26,9 +26,12 @@ jobs:
           poetry install --no-root
 
     - name: Run pre-commit hooks
-      run: export PIP_USER=0; SKIP=flake8 poetry run pre-commit run --all-files
+      run: |
+          $Env:PIP_USER=0
+          $Env:SKIP='flake8'
+          poetry run pre-commit run --all-files
 
     - name: Run flake8
-      run: "poetry run flake8 \
-        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
-        [flake8] %(code)s: %(text)s'"
+      run: |
+          poetry run flake8 `
+            --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'
