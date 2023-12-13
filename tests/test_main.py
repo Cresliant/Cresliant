@@ -5,7 +5,7 @@ from PIL import Image
 from src.editor import node_editor
 from src.utils import ImageController as dpg_img
 from src.utils.nodes import history_manager
-from src.utils.paths import resource_path
+from src.utils.paths import resource
 
 
 @pytest.fixture
@@ -20,9 +20,8 @@ def init_dpg():
             dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.new, indent=3, width=180)
 
 
-def test_all(init_dpg):
-    # Boilerplate for the app to run correctly without errors
-    image = Image.open(resource_path("icon.ico"))
+def test_nodes(init_dpg):
+    image = Image.open(resource("icon.ico"))
     with dpg.window(tag="Cresliant", show=False):
         with dpg.menu(tag="nodes", label="Nodes"):
             for module in node_editor.modules[1:]:
@@ -36,13 +35,13 @@ def test_all(init_dpg):
             assert isinstance(module.run(image, module.name.lower() + "_0"), Image.Image)
 
     # Testing history manager
-    for i in range(len(history_manager.history)):
-        curr = history_manager.current
+    for _ in range(len(history_manager.history)):
+        curr = history_manager.index
         history_manager.undo()
-        assert history_manager.current != curr
-    for i in range(len(history_manager.history)):
-        curr = history_manager.current
+        assert history_manager.index < curr
+    for _ in range(len(history_manager.history)):
+        curr = history_manager.index
         history_manager.redo()
-        assert history_manager.current != curr
+        assert history_manager.index > curr
 
     dpg.destroy_context()

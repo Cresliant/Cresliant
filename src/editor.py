@@ -1,6 +1,7 @@
 import json
 import os
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+import sys
+from contextlib import suppress
 
 import dearpygui.dearpygui as dpg
 import numpy as np
@@ -18,18 +19,20 @@ from src.corenodes.transform import (
     RotateModule,
     SharpnessModule,
 )
+from src.utils import fd, toaster
 from src.utils.nodes import HistoryItem, Link, history_manager
-from src.utils.paths import resource_path
+from src.utils.paths import resource
 
 
 class NodeEditor:
     _name = "Node Editor"
     _tag = "MainNodeEditor"
 
-    debug = False
+    debug = not hasattr(sys, "_MEIPASS")
 
     modules = []
     _node_links = []
+    _data = None
 
     _project = None
 
@@ -133,10 +136,8 @@ class NodeEditor:
             image = node.run(image, tag)
 
         dpg.delete_item(output.image)
-        try:
+        with suppress(SystemError):
             dpg.remove_alias(output.image)
-        except SystemError:
-            pass
 
         counter = output.image.split("_")[-1]
         output.image = "output_" + str(int(counter) + 1)
@@ -296,44 +297,61 @@ class NodeEditor:
                 }
 
         for link in self._node_links:
+            source = dpg.get_item_user_data(dpg.get_item_info(link.source)["parent"])
+            target = dpg.get_item_user_data(dpg.get_item_info(link.target)["parent"])
             data["links"].append(
                 {
-                    "source": str(dpg.get_item_user_data(dpg.get_item_info(link.source)["parent"])),
-                    "target": str(dpg.get_item_user_data(dpg.get_item_info(link.target)["parent"])),
+                    "source": source.name,
+                    "target": target.name,
                 }
             )
 
         if self._project:
             with open(self._project, "w") as file:
                 file.write(json.dumps(data))
+            return toaster.show("Save Project", "Project saved successfully.")
+
+        self._data = data
+        fd.change_callback(self.save_callback, True, ".cresliant")
+        fd.show_file_dialog()
+
+    def save_callback(self, info):
+        try:
+            filename = info[0]
+            location = info[2]
+        except IndexError:
+            toaster.show("Save project", "Invalid location specified.")
             return
 
-        location = asksaveasfilename(
-            filetypes=[("Cresliant", "*.cresliant")],
-            defaultextension=".cresliant",
-            initialfile="project.cresliant",
-            initialdir=os.curdir,
-        )
+        if not filename.endswith(".cresliant"):
+            filename += ".cresliant"
+
+        location = os.path.join(location, filename)
+
         try:
             with open(location, "w") as file:
-                file.write(json.dumps(data))
+                file.write(json.dumps(self._data))
         except FileNotFoundError:
+            toaster.show("Save Project", "Invalid location specified.")
             return
 
         self._project = location
+        toaster.show("Save Project", "Project saved successfully.")
 
     def open(self):
+        fd.change_callback(self.open_callback, False, ".cresliant")
+        fd.show_file_dialog()
+
+    def open_callback(self, info):
+        print(info)
+        location = info[0]
         try:
-            location = askopenfilename(
-                filetypes=[("Cresliant", "*.cresliant")],
-                initialdir=os.curdir,
-            )
-            data = json.load(open(location))
+            with open(location) as file:
+                data = json.load(file)
         except FileNotFoundError:
-            return
+            return toaster.show("Open Project", "Invalid location specified.")
 
         self.reset()
-
         nodes = []
         for node in data["nodes"]:
             module = None
@@ -374,10 +392,10 @@ class NodeEditor:
             source = None
             target = None
             for node in nodes:
-                check = node.split("_", maxsplit=2)[0]
-                if check in link["source"]:
+                check = node.split("_", maxsplit=2)[0].lower()
+                if check == link["source"].lower():
                     source = dpg.get_item_info(node)["children"][1][-1]
-                elif check in link["target"]:
+                elif check == link["target"].lower():
                     target = dpg.get_item_info(node)["children"][1][0]
 
             if not source or not target:
@@ -393,6 +411,7 @@ class NodeEditor:
         self._project = location
         self.update_path()
         self.update_output()
+        toaster.show("Open Project", "Project opened successfully.")
 
 
-node_editor = NodeEditor(Image.open(resource_path("icon.ico")))
+node_editor = NodeEditor(Image.open(resource("icon.ico")))

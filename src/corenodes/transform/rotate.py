@@ -41,5 +41,4 @@ class RotateModule(NodeParent):
         self.counter += 1
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
-        print(self.settings[tag]["rotate_degrees_" + tag.split("_")[1]])
         return image.rotate(self.settings[tag]["rotate_degrees_" + tag.split("_")[1]])

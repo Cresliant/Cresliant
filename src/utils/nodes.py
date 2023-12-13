@@ -2,13 +2,9 @@ import dearpygui.dearpygui as dpg
 from pydantic import BaseModel
 
 
-def find_available_pos() -> list[int]:
-    """
-    Finds an available position for a new node that is not overlapping with any other node
-    """
-
-    # TODO: Implement this function
-    return [0, 0]
+def find_available_pos():
+    x, y = dpg.get_mouse_pos(local=False)
+    return [max(0, x - 70), max(0, y - 70)]
 
 
 class Link(BaseModel):
@@ -202,19 +198,18 @@ class Theme:
         if cached is not None:
             return cached
 
-        with dpg.theme() as theme_id:
-            with dpg.theme_component(0):
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, color_value, category=dpg.mvThemeCat_Nodes)
-                dpg.add_theme_color(
-                    dpg.mvNodeCol_TitleBarHovered,
-                    (color_value[0] + 10, color_value[1] + 10, color_value[2] + 10),
-                    category=dpg.mvThemeCat_Nodes,
-                )
-                dpg.add_theme_color(
-                    dpg.mvNodeCol_TitleBarSelected,
-                    (color_value[0] + 25, color_value[1] + 25, color_value[2] + 25),
-                    category=dpg.mvThemeCat_Nodes,
-                )
+        with dpg.theme() as theme_id, dpg.theme_component(0):
+            dpg.add_theme_color(dpg.mvNodeCol_TitleBar, color_value, category=dpg.mvThemeCat_Nodes)
+            dpg.add_theme_color(
+                dpg.mvNodeCol_TitleBarHovered,
+                (color_value[0] + 10, color_value[1] + 10, color_value[2] + 10),
+                category=dpg.mvThemeCat_Nodes,
+            )
+            dpg.add_theme_color(
+                dpg.mvNodeCol_TitleBarSelected,
+                (color_value[0] + 25, color_value[1] + 25, color_value[2] + 25),
+                category=dpg.mvThemeCat_Nodes,
+            )
 
         self._cache[color_name] = theme_id
         return theme_id

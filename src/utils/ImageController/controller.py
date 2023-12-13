@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Type, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 import dearpygui.dearpygui as dpg
 from PIL import Image as img
@@ -32,7 +32,7 @@ T_ImageViewerCreator = TypeVar("T_ImageViewerCreator", bound="ImageViewerCreator
 class ImageController:
     image: Image | None = None
     tag_in_controller: ImageControllerTag
-    subscribers: dict[SubscriptionTag, Type[T_ImageViewerCreator]]
+    subscribers: dict[SubscriptionTag, type[T_ImageViewerCreator]]
     # Tag an already loaded DPG texture with this picture.
     # If loaded is False, the texture plug will be used.
     texture_tag: TextureTag
@@ -49,7 +49,7 @@ class ImageController:
         self.subscribers = {}
         self.texture_tag = tools.get_texture_plug()
 
-    def subscribe(self, image_viewer: Type[ImageViewerCreator]) -> SubscriptionTag:
+    def subscribe(self, image_viewer: type[ImageViewerCreator]) -> SubscriptionTag:
         subscription_tag = dpg.generate_uuid()
         self.subscribers[subscription_tag] = image_viewer
         return subscription_tag
@@ -69,8 +69,7 @@ class ImageController:
         return True
 
     def update_last_time_visible(self):
-        """
-        Updates the last time the picture was visible.
+        """Updates the last time the picture was visible.
         Also, if an image has been unloaded,
         it will be loaded back in, using the loader worker
         """
@@ -100,7 +99,7 @@ class ImageController:
         try:
             for image_viewer in self.subscribers.values():
                 try:
-                    image_viewer.show(self.texture_tag)  # noqa
+                    image_viewer.show(self.texture_tag)
                 except Exception:
                     traceback.print_exc()
         except RuntimeError:
@@ -116,7 +115,7 @@ class ImageController:
         self.loading = False
         for image_viewer in self.subscribers.values():
             try:
-                image_viewer.hide()  # noqa
+                image_viewer.hide()
             except Exception:
                 traceback.print_exc()
 
@@ -195,9 +194,8 @@ class ImageLoaderWorker(Worker):
 
 
 class Controller(dict[ImageControllerTag, ImageController]):
-    """
-    Stores all hash pictures and associates it with ImageController.
-    Also with the help of workers loads images into the DPG
+    """Stores all hash pictures and associates it with ImageController.
+    Also with the help of workers loads assets into the DPG
     """
 
     loading_queue: queue.LifoQueue[ImageController]
@@ -236,10 +234,9 @@ class Controller(dict[ImageControllerTag, ImageController]):
         queue_max_size: int = None,
         disable_work_in_threads: bool = False,
     ):
-        """
-        :param max_inactive_time: Time in seconds after which the picture will be unloaded from the DPG/RAM
+        """:param max_inactive_time: Time in seconds after which the picture will be unloaded from the DPG/RAM
         :param unloading_check_sleep_time: In this number of seconds the last visibility of the image will be checked
-        :param number_image_loader_workers: Number of simultaneous loading of images
+        :param number_image_loader_workers: Number of simultaneous loading of assets
         :param queue_max_size: If not set, it will be equal to number_image_loader_workers * 2
         :param disable_work_in_threads: Disables multi-threaded image un/loading
         """
@@ -259,11 +256,9 @@ class Controller(dict[ImageControllerTag, ImageController]):
     def add(
         self, image: str | bytes | Path | SupportsRead[bytes] | Image
     ) -> tuple[ImageControllerTag, ImageController]:
-        """
-        :param image: Pillow Image or the path to the image, or any other object that Pillow can open
+        """:param image: Pillow Image or the path to the image, or any other object that Pillow can open
         :return:
         """
-
         if not isinstance(image, Image):
             image = img.open(image)
         image: Image
@@ -271,7 +266,7 @@ class Controller(dict[ImageControllerTag, ImageController]):
         hash_image = image.resize((12, 12), LANCZOS).convert("L")
         pixels = list(hash_image.getdata())
         avg = sum(pixels) / len(pixels)
-        bits = "".join(map(lambda pixel: "1" if pixel < avg else "0", pixels))
+        bits = "".join("1" if pixel < avg else "0" for pixel in pixels)
         image_tag = int(bits, 2).__format__("016x").upper()
 
         # Checking if an image has already been added
@@ -282,11 +277,10 @@ class Controller(dict[ImageControllerTag, ImageController]):
         return image_tag, image_info
 
     def load_images(self, max_count: int = None):
-        """
-        Only works if `.disable_load_in_threads` == False.
-        Loads images to the DPG that are in the queue to be displayed.
+        """Only works if `.disable_load_in_threads` == False.
+        Loads assets to the DPG that are in the queue to be displayed.
 
-        :param max_count: (None - inf) Maximum number of images that can be loaded
+        :param max_count: (None - inf) Maximum number of assets that can be loaded
         """
         if not self.disable_work_in_threads:
             return
@@ -305,11 +299,10 @@ class Controller(dict[ImageControllerTag, ImageController]):
             ImageLoaderWorker.load(image_controller)
 
     def unload_images(self, max_count: int = None):
-        """
-        Only works if `.disable_load_in_threads` == False.
-        Unloads loaded images (textures) from the DPG that are in the remove queue.
+        """Only works if `.disable_load_in_threads` == False.
+        Unloads loaded assets (textures) from the DPG that are in the remove queue.
 
-        :param max_count: (None - inf) Maximum number of images that can be uploaded
+        :param max_count: (None - inf) Maximum number of assets that can be uploaded
         """
         if not self.disable_work_in_threads:
             return

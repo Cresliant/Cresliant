@@ -42,8 +42,8 @@ class FlipModule(NodeParent):
         mode_tag = "flip_mode_" + tag.split("_")[-1]
         if self.settings[tag][mode_tag] == "Horizontal":
             return image.transpose(Image.FLIP_LEFT_RIGHT)
-        elif self.settings[tag][mode_tag] == "Vertical":
+        if self.settings[tag][mode_tag] == "Vertical":
             return image.transpose(Image.FLIP_TOP_BOTTOM)
-        else:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            return image.transpose(Image.FLIP_TOP_BOTTOM)
+
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        return image.transpose(Image.FLIP_TOP_BOTTOM)
