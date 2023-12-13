@@ -117,7 +117,7 @@ def handle_popup(_sender, app_data):
 actions = {
     dpg.mvKey_V: node_editor.duplicate_nodes,
     dpg.mvKey_N: node_editor.reset,
-    dpg.mvKey_E: lambda: [fd.change_callback(export, True), fd.show_file_dialog()],
+    dpg.mvKey_E: lambda: [fd.change(export, True), fd.show_file_dialog()],
     dpg.mvKey_S: node_editor.save,
     dpg.mvKey_O: node_editor.open,
     dpg.mvKey_Q: dpg.stop_dearpygui,

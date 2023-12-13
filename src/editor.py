@@ -312,7 +312,7 @@ class NodeEditor:
             return toaster.show("Save Project", "Project saved successfully.")
 
         self._data = data
-        fd.change_callback(self.save_callback, True, ".cresliant")
+        fd.change(self.save_callback, True, ".cresliant")
         fd.show_file_dialog()
 
     def save_callback(self, info):
@@ -339,7 +339,7 @@ class NodeEditor:
         toaster.show("Save Project", "Project saved successfully.")
 
     def open(self):
-        fd.change_callback(self.open_callback, False, ".cresliant")
+        fd.change(self.open_callback, False, ".cresliant")
         fd.show_file_dialog()
 
     def open_callback(self, info):

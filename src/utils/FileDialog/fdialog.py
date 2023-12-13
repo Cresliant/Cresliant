@@ -36,7 +36,7 @@ class FileDialog:
 
     def __init__(
         self,
-        title="File dialog",
+        title="File Dialog",
         tag="file_dialog",
         width=950,
         height=650,
@@ -570,7 +570,7 @@ class FileDialog:
 
         # main file dialog header
         with dpg.window(
-            label="File dialog",
+            label=self.title,
             tag=self.tag,
             no_resize=self.no_resize,
             show=False,
@@ -702,13 +702,13 @@ class FileDialog:
         self.start()
         dpg.show_item(self.tag)
 
-    def change_callback(self, callback, saving=False, file_filter=None):
+    def change(self, callback, saving=False, file_filter=None):
         self.callback = callback
         self.saving = saving
         if file_filter:
             self.file_filter = file_filter
         else:
-            self.file_filter = ".*"
+            self.file_filter = ".png"
 
 
-fd = FileDialog(callback=None, default_path=os.curdir, allow_drag=False, file_filter=".*", multi_selection=False)
+fd = FileDialog(callback=None, default_path=os.curdir, allow_drag=False, file_filter=".png", multi_selection=False)

@@ -46,7 +46,7 @@ class InputModule:
                 label="Choose Image",
                 width=120,
                 height=50,
-                callback=lambda: [fd.change_callback(self.pick_image), fd.show_file_dialog()],
+                callback=lambda: [fd.change(self.pick_image), fd.show_file_dialog()],
             )
 
         dpg.bind_item_theme("Input", theme.red)
