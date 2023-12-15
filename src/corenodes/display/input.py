@@ -3,15 +3,16 @@ from PIL import Image
 
 from src.utils import ImageController as dpg_img
 from src.utils import fd, theme, toaster
+from src.utils.nodes import NodeParent
 from src.utils.paths import resource
 
 
-class InputModule:
+class InputModule(NodeParent):
     name = "Input"
     tooltip = "Image input"
 
     def __init__(self, image: Image.Image):
-        self.counter = 0
+        super().__init__()
         self.image = image
         self.image_path = resource("icon.ico")
         self.viewer = None
