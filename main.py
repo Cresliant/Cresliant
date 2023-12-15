@@ -170,7 +170,12 @@ with dpg.window(
             dpg.add_menu_item(tag="open", label="Open Project...", shortcut="Ctrl+O", callback=node_editor.open)
             dpg.add_separator()
             dpg.add_menu_item(tag="save", label="Save Project...", shortcut="Ctrl+S", callback=node_editor.save)
-            dpg.add_menu_item(tag="export", label="Export Output...     ", shortcut="Ctrl+E", callback=export)
+            dpg.add_menu_item(
+                tag="export",
+                label="Export Output...     ",
+                shortcut="Ctrl+E",
+                callback=lambda: [fd.change(export, True), fd.show_file_dialog()],
+            )
             dpg.add_separator()
             dpg.add_menu_item(tag="close", label="Quit", shortcut="Ctrl+Q", callback=dpg.stop_dearpygui)
 

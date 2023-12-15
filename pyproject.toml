@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cresliant"
-version = "1.2.0"
+version = "1.2.1"
 description = "A powerful node-based image editor made in Python."
 authors = ["The Cresliant Team"]
 readme = "README.md"
