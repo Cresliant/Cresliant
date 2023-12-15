@@ -1,6 +1,8 @@
 import configparser
+import os
 import subprocess
 import sys
+import zipfile
 
 
 def get_base_prefix_compat():
@@ -41,3 +43,11 @@ if sys.platform == "win32":
     args.append("--icon=assets/icon.ico")
 
 subprocess.call(args)
+
+# Create plugins folder along with the build
+os.makedirs("dist/src/plugins", exist_ok=True)
+
+# Zip the executable and the plugins folder
+with zipfile.ZipFile("dist/Cresliant.zip", "w") as zip_file:
+    zip_file.write("dist/Cresliant.exe", arcname="Cresliant.exe")
+    zip_file.write("dist/src/plugins", arcname="src/plugins")

@@ -37,8 +37,8 @@ Cresliant is a powerful node-based image editor made in Python. It offers an eas
 ### Comprehensive Node List
 - Cresliant has a comprehensive node list, showcasing an extensive collection of pre-built nodes that cover a wide range of image editing tasks. This includes nodes for basic operations like cropping and resizing, advanced filters for artistic effects, and utility nodes for managing data flow within the editing graph.
 
-### Plugin Support (Not Yet Implemented)
-- Cresliant boasts a dynamic plugin architecture, allowing users to extend their already broad range of processing nodes. The plugin system empowers the community to contribute and enhance the editor's capabilities.
+### Plugin Support
+- Cresliant boasts a dynamic plugin architecture, allowing users to extend their already broad range of processing nodes. The plugin system empowers the community to contribute and enhance the editor's capabilities without having to edit the source code itself. Get started by checking out the example plugin at `src/plugins/example_plugin`
 
 ---
 

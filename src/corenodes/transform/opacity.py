@@ -9,8 +9,8 @@ class OpacityModule(NodeParent):
     name = "Opacity"
     tooltip = "Change image opacity"
 
-    def __init__(self, update_output: callable):
-        super().__init__(update_output)
+    def __init__(self):
+        super().__init__()
 
     def new(self, history=True):
         with dpg.node(
@@ -36,9 +36,7 @@ class OpacityModule(NodeParent):
         tag = "opacity_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.yellow)
         self.settings[tag] = {"opacity_percentage_" + str(self.counter): 100}
-        if history:
-            self.update_history(tag)
-        self.counter += 1
+        self.end(tag, history)
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         image = image.copy()

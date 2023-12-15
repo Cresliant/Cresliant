@@ -9,8 +9,8 @@ class FlipModule(NodeParent):
     name = "Flip"
     tooltip = "Flip image"
 
-    def __init__(self, update_output: callable):
-        super().__init__(update_output)
+    def __init__(self):
+        super().__init__()
 
     def new(self, history=True):
         with dpg.node(
@@ -34,9 +34,7 @@ class FlipModule(NodeParent):
         tag = "flip_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.yellow)
         self.settings[tag] = {"flip_mode_" + str(self.counter): "Horizontal"}
-        if history:
-            self.update_history(tag)
-        self.counter += 1
+        self.end(tag, history)
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         mode_tag = "flip_mode_" + tag.split("_")[-1]

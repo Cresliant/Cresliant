@@ -27,7 +27,6 @@ with dpg.font_registry():
     dpg.add_font(resource("Roboto-Regular.ttf"), 17, tag="font")
     dpg.bind_font("font")
 
-
 with dpg.texture_registry():
     dpg.add_static_texture(1, 1, [0] * 1 * 1 * 4, tag="output_0")
 
@@ -70,8 +69,10 @@ with dpg.window(
     label="Add Node",
     max_size=[200, 250],
 ):
-    for module in node_editor.modules[1:-1]:
+    for idx, module in enumerate(node_editor.modules[1:-1]):
         dpg.add_button(label=module.name, tag=module.name + "_popup", callback=module.new, indent=3, width=180)
+        if module.is_plugin and not node_editor.modules[idx + 2].is_plugin:
+            dpg.add_spacer(height=5)
 
 with dpg.window(
     tag="node_popup_window", no_move=True, no_close=True, no_resize=True, no_collapse=True, show=False, label="Settings"
@@ -178,8 +179,10 @@ with dpg.window(
             dpg.add_menu_item(label="Redo    ", tag="redo", shortcut="Ctrl+Y", callback=history_manager.redo)
 
         with dpg.menu(tag="nodes", label="Nodes"):
-            for module in node_editor.modules[1:]:
+            for idx, module in enumerate(node_editor.modules[1:]):
                 dpg.add_menu_item(tag=module.name, label=module.name, callback=module.new)
+                if module.is_plugin and not node_editor.modules[idx + 2].is_plugin:
+                    dpg.add_separator()
 
         with dpg.menu(tag="help", label="Help"):
             dpg.add_menu_item(

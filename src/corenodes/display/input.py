@@ -10,12 +10,11 @@ class InputModule:
     name = "Input"
     tooltip = "Image input"
 
-    def __init__(self, image: Image.Image, update_output: callable):
+    def __init__(self, image: Image.Image):
         self.counter = 0
         self.image = image
         self.image_path = resource("icon.ico")
         self.viewer = None
-        self.update_output = update_output
         self.protected = True
 
     def pick_image(self, path):

@@ -9,8 +9,8 @@ class CropModule(NodeParent):
     name = "Crop"
     tooltip = "Crop image"
 
-    def __init__(self, update_output: callable):
-        super().__init__(update_output)
+    def __init__(self):
+        super().__init__()
 
     def new(self, history=True):
         input_image = dpg.get_item_user_data("Input").image
@@ -69,9 +69,7 @@ class CropModule(NodeParent):
             "right_" + str(self.counter): input_image.width,
             "bottom_" + str(self.counter): input_image.height,
         }
-        if history:
-            self.update_history(tag)
-        self.counter += 1
+        self.end(tag, history)
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         tag = tag.split("_")[-1]

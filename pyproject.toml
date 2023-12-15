@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cresliant"
-version = "1.1.0"
+version = "1.2.0"
 description = "A powerful node-based image editor made in Python."
 authors = ["The Cresliant Team"]
 readme = "README.md"
@@ -14,7 +14,7 @@ pydantic = "^2.5.2"
 psutil = "^5.9.6"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.1.7"
+ruff = "^0.1.8"
 pre-commit = "^3.6.0"
 pyinstaller = "^6.3.0"
 pytest = "^7.4.3"
@@ -40,5 +40,5 @@ ignore = [
     "ISC001",
     "RET503", "RET504",
     "RUF005", "RUF012", "RUF013", "RUF015",
-    "S311", "S101", "S603",
+    "S311", "S101", "S603", "S605",
     "SIM102", "SIM108"]
