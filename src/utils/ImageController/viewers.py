@@ -30,8 +30,7 @@ class ImageViewerCreator(ABC):
     __subscription_tag: SubscriptionTag | None = None
 
     def set_controller(self, controller: ControllerType = None):
-        """
-        Set the image controller.
+        """Set the image controller.
         The next image loading will be done through this controller.
 
         :param controller: Set `None` if you want to set the default controller
@@ -57,7 +56,7 @@ class ImageViewerCreator(ABC):
 
         controller = self.get_controller()
         _, self.__image_info = controller.add(image)
-        self.__subscription_tag = self.__image_info.subscribe(self)  # noqa
+        self.__subscription_tag = self.__image_info.subscribe(self)
         self.image = self.__image_info.image
 
         if self.__image_info.loaded:
@@ -77,7 +76,7 @@ class ImageViewerCreator(ABC):
         ...
 
     @abstractmethod
-    def show(self, texture_tag: TextureTag) -> "Self":
+    def show(self, texture_tag: TextureTag) -> Self:
         ...
 
     @abstractmethod
@@ -107,23 +106,14 @@ class ImageViewer(ImageViewerCreator):
     @classmethod
     @cache
     def _get_theme(cls) -> int:
-        with dpg.theme() as theme:
-            with dpg.theme_component(dpg.mvAll, parent=theme) as theme_component:
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_WindowPadding, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component
-                )
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_FramePadding, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component
-                )
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_CellPadding, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component
-                )
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_ItemSpacing, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component
-                )
-                dpg.add_theme_style(
-                    dpg.mvStyleVar_ChildBorderSize, 0, category=dpg.mvThemeCat_Core, parent=theme_component
-                )
+        with dpg.theme() as theme, dpg.theme_component(dpg.mvAll, parent=theme) as theme_component:
+            dpg.add_theme_style(
+                dpg.mvStyleVar_WindowPadding, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component
+            )
+            dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component)
+            dpg.add_theme_style(dpg.mvStyleVar_CellPadding, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component)
+            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 0, category=dpg.mvThemeCat_Core, parent=theme_component)
+            dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 0, category=dpg.mvThemeCat_Core, parent=theme_component)
         return theme
 
     def _get_visible_handler(self) -> int:
@@ -150,9 +140,8 @@ class ImageViewer(ImageViewerCreator):
             width = int(self.image.width * (self.height / self.image.height))
             return width, self.height
 
-    def set_size(self, *, width: int = None, height: int = None) -> "Self":
-        """
-        Set the size of the viewer when the image is loaded in the viewer
+    def set_size(self, *, width: int = None, height: int = None) -> Self:
+        """Set the size of the viewer when the image is loaded in the viewer
         (is also used when dimensions are set and do not equal None).
         If the dimensions are None, the size of the picture will be used.
         If one of the dimensions is None, it will be proportionally
@@ -165,7 +154,7 @@ class ImageViewer(ImageViewerCreator):
         self.width = width
         self.height = height
         if not self.group:
-            return
+            return None
         width, height = self.get_size()
         try:
             dpg.configure_item(self._view_window, width=width, height=height)
@@ -175,17 +164,15 @@ class ImageViewer(ImageViewerCreator):
             traceback.print_exc()
         return self
 
-    def set_width(self, width: int = None) -> "Self":
-        """
-        It uses the function `.set_size` and only sets the width, the width will not be changed
+    def set_width(self, width: int = None) -> Self:
+        """It uses the function `.set_size` and only sets the width, the width will not be changed
 
         :param width: Viewer width. Used when the image is loaded in the viewer or another dimension is also set
         """
         return self.set_size(width=width, height=self.height)
 
-    def set_height(self, height: int = None) -> "Self":
-        """
-        It uses the function `.set_size` and only sets the height, the width will not be changed
+    def set_height(self, height: int = None) -> Self:
+        """It uses the function `.set_size` and only sets the height, the width will not be changed
 
         :param height: Viewer height. Used when the image is loaded in the viewer or another dimension is also set
         """
@@ -198,8 +185,7 @@ class ImageViewer(ImageViewerCreator):
         unload_width: int = 100,
         unload_height: int = 100,
     ):
-        """
-        Image viewer, which automatically unloads the image
+        """Image viewer, which automatically unloads the image
         from the DPG if the user can't see it.
         You can specify some arguments at creation if you want
 
@@ -217,9 +203,8 @@ class ImageViewer(ImageViewerCreator):
         if image:
             self.load(image)
 
-    def set_image_handler(self, handler: int | str = None) -> "Self":
-        """
-        Set the DPG handler on the image.
+    def set_image_handler(self, handler: int | str = None) -> Self:
+        """Set the DPG handler on the image.
         It will work even if the image is not loaded into the viewer.
         Not working during image loading.
 
@@ -238,9 +223,8 @@ class ImageViewer(ImageViewerCreator):
         unload_width: int = None,
         unload_height: int = None,
         parent: int | str = 0,
-    ) -> "Self":
-        """
-        Creates a viewer in the DPG, if it has already been created,
+    ) -> Self:
+        """Creates a viewer in the DPG, if it has already been created,
         moves it to a new place (deletes the old).
         If you have pre-specified the dimensions, you don't have to set them here.
 
@@ -275,10 +259,10 @@ class ImageViewer(ImageViewerCreator):
             self.show(self.texture_tag)
         return self
 
-    def show(self, texture_tag: TextureTag) -> "Self":
+    def show(self, texture_tag: TextureTag) -> Self:
         self.texture_tag = texture_tag
         if not self.group:  # If not created
-            return
+            return None
         width, height = self.get_size()
         try:
             dpg.delete_item(self._view_window, children_only=True)
@@ -303,10 +287,10 @@ class ImageViewer(ImageViewerCreator):
             if elements := dpg.get_item_children(self._view_window, 1):
                 dpg.configure_item(elements[0], color=(0, 255, 0))
 
-    def hide(self) -> "Self":
+    def hide(self) -> Self:
         self.texture_tag = tools.get_texture_plug()
         if not self.group:  # If not created
-            return
+            return None
         self.dpg_image = None
 
         try:
@@ -328,8 +312,7 @@ class ImageViewer(ImageViewerCreator):
         return self
 
     def delete(self):
-        """
-        Deletes everything that was created by this object,
+        """Deletes everything that was created by this object,
         namely: the viewer (DPG elements), handlers.
         Also resets all variables (except `unload_width` and `unload_height`)
         """
@@ -342,14 +325,14 @@ class ImageViewer(ImageViewerCreator):
         self.width = None
         self.height = None
 
-        self.group = None  # noqa
-        self._view_window = None  # noqa
-        self.texture_tag = tools.get_texture_plug()  # noqa
+        self.group = None
+        self._view_window = None
+        self.texture_tag = tools.get_texture_plug()
 
         super().__del__()
 
         if self._visible_handler:
             tools.HandlerDeleter.add(self._get_visible_handler())
-            self._visible_handler = None  # noqa
+            self._visible_handler = None
         self.image_handler = None
         self.controller = None

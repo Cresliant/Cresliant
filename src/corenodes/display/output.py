@@ -13,6 +13,7 @@ class OutputModule:
         self.image = image
         self.pillow_image = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
         self.protected = True
+        self.is_plugin = False
 
     def new(self):
         if dpg.does_item_exist("Output"):
@@ -24,8 +25,7 @@ class OutputModule:
             label="Output",
             pos=[800, 100],
             user_data=self,
-        ):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input, tag="Output_attribute"):
-                dpg.add_image(self.image)
+        ), dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input, tag="Output_attribute"):
+            dpg.add_image(self.image)
 
         dpg.bind_item_theme("Output", theme.red)

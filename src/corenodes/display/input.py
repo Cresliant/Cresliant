@@ -1,29 +1,29 @@
-from tkinter.filedialog import askopenfilename
-
 from dearpygui import dearpygui as dpg
 from PIL import Image
 
 from src.utils import ImageController as dpg_img
-from src.utils import theme
-from src.utils.paths import resource_path
+from src.utils import fd, theme, toaster
+from src.utils.nodes import NodeParent
+from src.utils.paths import resource
 
 
-class InputModule:
+class InputModule(NodeParent):
     name = "Input"
     tooltip = "Image input"
 
-    def __init__(self, image: Image.Image, update_output: callable):
-        self.counter = 0
+    def __init__(self, image: Image.Image):
+        super().__init__()
         self.image = image
-        self.image_path = resource_path("icon.ico")
+        self.image_path = resource("icon.ico")
         self.viewer = None
-        self.update_output = update_output
         self.protected = True
 
     def pick_image(self, path):
         try:
+            path = path[0]
             image = Image.open(path)
         except Exception:
+            toaster.show("Input", "Invalid image file.")
             return
 
         image = image.convert("RGBA")
@@ -38,24 +38,15 @@ class InputModule:
             dpg.delete_item("Input")
 
         with dpg.node(
-            parent="MainNodeEditor",
-            tag="Input",
-            label="Input",
-            pos=[10, 100],
-            user_data=self,
-        ):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
-                self.viewer = dpg_img.add_image(self.image)
-                dpg.add_spacer(height=5)
-                dpg.add_button(
-                    label="Choose Image",
-                    width=120,
-                    height=50,
-                    callback=lambda: self.pick_image(
-                        askopenfilename(
-                            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp")],
-                        )
-                    ),
-                )
+            parent="MainNodeEditor", tag="Input", label="Input", pos=[10, 100], user_data=self
+        ), dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
+            self.viewer = dpg_img.add_image(self.image)
+            dpg.add_spacer(height=5)
+            dpg.add_button(
+                label="Choose Image",
+                width=120,
+                height=50,
+                callback=lambda: [fd.change(self.pick_image), fd.show_file_dialog()],
+            )
 
         dpg.bind_item_theme("Input", theme.red)

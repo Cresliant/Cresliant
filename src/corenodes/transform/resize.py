@@ -9,8 +9,8 @@ class ResizeModule(NodeParent):
     name = "Resize"
     tooltip = "Resize image"
 
-    def __init__(self, update_output: callable):
-        super().__init__(update_output)
+    def __init__(self):
+        super().__init__()
 
     def new(self, history=True):
         input_image = dpg.get_item_user_data("Input").image
@@ -65,9 +65,7 @@ class ResizeModule(NodeParent):
             "height_size_" + str(self.counter): input_image.height,
             "resize_percentage_" + str(self.counter): 100,
         }
-        if history:
-            self.update_history(tag)
-        self.counter += 1
+        self.end(tag, history)
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         tag = tag.split("_")[-1]

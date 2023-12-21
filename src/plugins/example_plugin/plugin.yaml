@@ -1,0 +1,11 @@
+name: Test Plugin  # Please make sure that the name is unique, it's used to identify the plugin
+author: FirePlank
+version: 0.1.0
+description: A test plugin to show how to use the plugin system  # This is shown as the tooltip
+enabled: false  # Whether to enable the plugin or not
+runtime:
+  main: main.py  # The main file of your plugin
+requirements:
+  # any extra requirements for your plugin, e.g.:
+  # - name: requests
+  #   version: 2.25.1  # Optional, if not specified, the latest version will be used

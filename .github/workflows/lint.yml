@@ -1,4 +1,4 @@
-name: Pylint
+name: Lint & Test
 
 on:
   push:
@@ -7,31 +7,48 @@ on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
+  lint:
+    runs-on: ubuntu-latest
+
+    env:
+      PIPENV_HIDE_EMOJIS: 1
+      PIPENV_NOSPIN: 1
+
+      PYTHON_VERSION: "3.11"
+      POETRY_VERSION: "1.7.0"
+
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: false
+          virtualenvs-in-project: false
 
-    - name: Install dependencies using poetry
-      run: |
-          pip install poetry
-          poetry install --no-root
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+          cache-dependency-path: poetry.lock
 
-    - name: Run pre-commit hooks
-      run: |
-          $Env:PIP_USER=0
-          $Env:SKIP='flake8'
-          poetry run pre-commit run --all-files
+      - name: Set Poetry environment
+        run: |
+          poetry env use ${{ env.PYTHON_VERSION }}
 
-    - name: Run flake8
-      run: |
-          poetry run flake8 `
-            --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'
+      - name: Install Dependencies
+        run: poetry install --no-root
+
+      - name: Run pre-commit hooks
+        run: export PIP_USER=0; SKIP=ruff SKIP=pytest pre-commit run --all-files
+
+      - name: Run pytest
+        uses: pavelzw/pytest-action@v2
+        with:
+          emoji: false
+
+      - name: Run ruff
+        run: "poetry run ruff check --output-format=github ."

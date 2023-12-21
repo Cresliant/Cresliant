@@ -13,13 +13,13 @@ try:
     import numpy as np
 
     def _image_to_1d_array(image: Image) -> np.array:
-        return np.array(image, dtype=np.float32).ravel() / 255  # noqa
+        return np.array(image, dtype=np.float32).ravel() / 255
 
 except ModuleNotFoundError:
     import logging
 
     logger = logging.getLogger("DearPyGui_ImageController")
-    logger.warning("numpy not installed. In DPG images will take longer to load (about 8 times slower).")
+    logger.warning("numpy not installed. In DPG assets will take longer to load (about 8 times slower).")
 
     def _image_to_1d_array(image: Image) -> list:
         img_1D_array = []
@@ -35,7 +35,7 @@ except ModuleNotFoundError:
 
 
 texture_registry: int | str = 0
-texture_plug: TextureTag = None  # noqa
+texture_plug: TextureTag = None
 
 
 def set_texture_registry(texture_registry_tag: int | str):
@@ -63,8 +63,7 @@ def image_to_dpg_texture(image: Image) -> TextureTag:
 
 
 class HandlerDeleter:
-    """
-    Prevents the DPG from shutting down suddenly.
+    """Prevents the DPG from shutting down suddenly.
     Removes the Handler after a period of time.
     """
 
@@ -74,8 +73,7 @@ class HandlerDeleter:
 
     @classmethod
     def add(cls, handler: int | str):
-        """
-        Adds a handler to the deletion queue
+        """Adds a handler to the deletion queue
         :param handler: DPG handler
         """
         if not cls.__thread:

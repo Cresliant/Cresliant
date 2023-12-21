@@ -9,8 +9,8 @@ class BlurModule(NodeParent):
     name = "Blur"
     tooltip = "Blur image"
 
-    def __init__(self, update_output: callable):
-        super().__init__(update_output)
+    def __init__(self):
+        super().__init__()
 
     def new(self, history=True):
         with dpg.node(
@@ -44,9 +44,7 @@ class BlurModule(NodeParent):
         tag = "blur_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.green)
         self.settings[tag] = {"blur_mode_" + str(self.counter): "Gaussian", "blur_percentage_" + str(self.counter): 1}
-        if history:
-            self.update_history(tag)
-        self.counter += 1
+        self.end(tag, history)
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         if self.settings[tag]["blur_mode_" + tag.split("_")[-1]] == "Box":

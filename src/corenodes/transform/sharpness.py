@@ -9,8 +9,8 @@ class SharpnessModule(NodeParent):
     name = "Sharpness"
     tooltip = "Adjust sharpness"
 
-    def __init__(self, update_output: callable):
-        super().__init__(update_output)
+    def __init__(self):
+        super().__init__()
 
     def new(self, history=True):
         with dpg.node(
@@ -36,9 +36,7 @@ class SharpnessModule(NodeParent):
         tag = "sharpness_" + str(self.counter)
         dpg.bind_item_theme(tag, theme.blue)
         self.settings[tag] = {"sharpness_percentage_" + str(self.counter): 1}
-        if history:
-            self.update_history(tag)
-        self.counter += 1
+        self.end(tag, history)
 
     def run(self, image: Image.Image, tag: str) -> Image.Image:
         tag = tag.split("_")[-1]

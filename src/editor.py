@@ -1,9 +1,10 @@
+import importlib.util
 import json
 import os
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+import sys
 
 import dearpygui.dearpygui as dpg
-import numpy as np
+import yaml
 from PIL import Image
 
 from src.corenodes.display import InputModule, OutputModule
@@ -18,42 +19,75 @@ from src.corenodes.transform import (
     RotateModule,
     SharpnessModule,
 )
-from src.utils.nodes import HistoryItem, Link, history_manager
-from src.utils.paths import resource_path
+from src.utils import fd, toaster
+from src.utils.nodes import HistoryItem, Link, history_manager, update
+from src.utils.paths import resource
 
 
 class NodeEditor:
     _name = "Node Editor"
     _tag = "MainNodeEditor"
 
-    debug = False
+    debug = not hasattr(sys, "_MEIPASS")
 
     modules = []
-    _node_links = []
+    _data = None
 
     _project = None
 
-    path = []
-
     def __init__(self, pillow_image: Image.Image):
         self.modules = [
-            InputModule(pillow_image, self.update_output),
-            ResizeModule(self.update_output),
-            RotateModule(self.update_output),
-            BlurModule(self.update_output),
-            BrightnessModule(self.update_output),
-            ContrastModule(self.update_output),
-            SharpnessModule(self.update_output),
-            OpacityModule(self.update_output),
-            CropModule(self.update_output),
-            FlipModule(self.update_output),
+            InputModule(pillow_image),
+            ResizeModule(),
+            RotateModule(),
+            BlurModule(),
+            BrightnessModule(),
+            ContrastModule(),
+            SharpnessModule(),
+            OpacityModule(),
+            CropModule(),
+            FlipModule(),
             OutputModule("output_0"),
         ]
 
+        # Load all plugins from the plugins folder dynamically
+        for plugin in os.listdir("src/plugins"):
+            if not os.path.isdir("src/plugins/" + plugin):
+                continue
+            try:
+                with open("src/plugins/" + plugin + "/plugin.yaml") as file:
+                    info = yaml.safe_load(file)
+            except FileNotFoundError:
+                continue
+
+            if info.get("enabled", True) is False:
+                continue
+
+            # install any requirements that the plugin depends on
+            if info.get("requirements"):
+                for requirement in info.get("requirements", []):
+                    try:
+                        version = f"=={requirement['version']}"
+                    except KeyError:
+                        version = ""
+                    os.system(f"pip install {requirement['name']}{version}")
+
+            file = info["runtime"]["main"]
+            if not file.endswith(".py"):
+                file += ".py"
+
+            spec = importlib.util.spec_from_file_location("plugin", "src/plugins/" + plugin + "/" + file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            if "Node" in dir(module):
+                node = module.Node()
+                node.is_plugin = True
+                self.modules.insert(1, node)
+
     def start(self):
-        history_manager.update_path = self.update_path
-        history_manager.update_output = self.update_output
-        history_manager.links = self._node_links
+        history_manager.update_path = update.update_path
+        history_manager.update_output = update.update_output
+        history_manager.links = update.node_links
 
         with dpg.node_editor(
             tag=self._tag,
@@ -67,107 +101,25 @@ class NodeEditor:
 
         for module in self.modules[1:-1]:
             with dpg.tooltip(parent=module.name):
+                if module.is_plugin:
+                    continue
                 dpg.add_text(module.tooltip)
             with dpg.tooltip(parent=module.name + "_popup"):
+                if module.is_plugin:
+                    continue
                 dpg.add_text(module.tooltip)
 
-    def update_path(self):
-        self.path.clear()
-        for node in dpg.get_all_items():
-            try:
-                data_ = dpg.get_item_user_data(node)
-            except SystemError:
-                continue
-            if data_ and data_.name == "Input":
-                self.path.append(node)
-                break
-
-        while True:
-            link = dpg.get_item_info(self.path[-1])["children"][1][-1]
-            found = False
-            for link_ in self._node_links:
-                if link_.source == link:
-                    try:
-                        self.path.append(dpg.get_item_info(link_.target)["parent"])
-                    except SystemError:
-                        continue
-
-                    found = True
-                    break
-
-            if not found:
-                break
-
-    def update_output(self, sender=None, app_data=None, history=True):
-        if sender and app_data:
-            try:
-                node = dpg.get_item_info(dpg.get_item_info(sender)["parent"])["parent"]
-                module = dpg.get_item_user_data(node)
-            except SystemError:
-                return
-
-            alias = dpg.get_item_alias(node)
-            if history or history is None:
-                history_manager.append(
-                    HistoryItem(
-                        tag=alias,
-                        action="update",
-                        data={sender: (app_data, module.settings[alias][sender])},
-                    )
-                )
-            module.settings[alias][sender] = app_data
-        try:
-            output = dpg.get_item_user_data(self.path[-1])
-        except IndexError:
-            dpg.delete_item("Output_attribute", children_only=True)
-            return
-        if output.name != "Output":
-            dpg.delete_item("Output_attribute", children_only=True)
-            return
-
-        image = dpg.get_item_user_data("Input").image
-        img_size = image.size
-        for node in self.path[1:-1]:
-            tag = dpg.get_item_alias(node)
-            node = dpg.get_item_user_data(node)
-            image = node.run(image, tag)
-
-        dpg.delete_item(output.image)
-        try:
-            dpg.remove_alias(output.image)
-        except SystemError:
-            pass
-
-        counter = output.image.split("_")[-1]
-        output.image = "output_" + str(int(counter) + 1)
-        output.pillow_image = image.copy()
-        image.thumbnail((450, 450), Image.LANCZOS)
-        with dpg.texture_registry():
-            dpg.add_static_texture(
-                image.width,
-                image.height,
-                np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0,
-                tag=output.image,
-            )
-        dpg.delete_item("Output_attribute", children_only=True)
-        dpg.add_image(output.image, parent="Output_attribute")
-        if output.pillow_image.size != img_size:
-            dpg.add_spacer(height=5, parent="Output_attribute")
-            dpg.add_text(
-                f"Image size: {output.pillow_image.width}x{output.pillow_image.height}", parent="Output_attribute"
-            )
-
     def link_callback(self, sender, app_data):
-        for link in self._node_links:
+        for link in update.node_links:
             if link.source == app_data[0]:
                 try:
                     dpg.delete_item(link.id)
                 except SystemError:
                     continue
-                self._node_links.remove(link)
+                update.node_links.remove(link)
 
         link = dpg.add_node_link(app_data[0], app_data[1], parent=sender)
-        self._node_links.append(Link(source=app_data[0], target=app_data[1], id=int(link)))
+        update.node_links.append(Link(source=app_data[0], target=app_data[1], id=int(link)))
         history_manager.append(
             HistoryItem(
                 tag=str(link),
@@ -180,12 +132,12 @@ class NodeEditor:
             )
         )
 
-        self.update_path()
-        self.update_output()
+        update.update_path()
+        update.update_output()
 
     def delink_callback(self, _sender, app_data):
         dpg.delete_item(app_data)
-        for link in self._node_links:
+        for link in update.node_links:
             if link.id == app_data:
                 history_manager.append(
                     HistoryItem(
@@ -198,11 +150,11 @@ class NodeEditor:
                         },
                     )
                 )
-                self._node_links.remove(link)
+                update.node_links.remove(link)
                 break
 
-        self.update_path()
-        self.update_output()
+        update.update_path()
+        update.update_output()
 
     def delete_nodes(self, _sender, _app_data):
         for node in dpg.get_selected_nodes(self._tag):
@@ -225,17 +177,17 @@ class NodeEditor:
             )
 
             dpg.delete_item(node)
-            for link in self._node_links:
+            for link in update.node_links:
                 if link.source in node_links or link.target in node_links:
-                    self._node_links.remove(link)
+                    update.node_links.remove(link)
 
-        self.update_path()
-        self.update_output()
+        update.update_path()
+        update.update_output()
 
     def delete_links(self, _sender, _app_data):
         for link in dpg.get_selected_links(self._tag):
             dpg.delete_item(link)
-            for link_ in self._node_links:
+            for link_ in update.node_links:
                 if link_.id == link:
                     history_manager.append(
                         HistoryItem(
@@ -248,11 +200,11 @@ class NodeEditor:
                             },
                         )
                     )
-                    self._node_links.remove(link_)
+                    update.node_links.remove(link_)
                     break
 
-        self.update_path()
-        self.update_output()
+        update.update_path()
+        update.update_output()
 
     def duplicate_nodes(self, _sender=None, _app_data=None):
         for node in dpg.get_selected_nodes(self._tag):
@@ -272,15 +224,15 @@ class NodeEditor:
             except AttributeError:
                 continue
 
-        self._node_links.clear()
+        update.node_links.clear()
         history_manager.clear()
         self._project = None
 
         self.modules[0].new()
         self.modules[-1].new()
 
-        self.update_path()
-        self.update_output()
+        update.update_path()
+        update.update_output()
 
     def save(self):
         data = {"nodes": {}, "links": [], "image": dpg.get_item_user_data("Input").image_path}
@@ -295,45 +247,61 @@ class NodeEditor:
                     "settings": data_.settings if hasattr(data_, "settings") else {},
                 }
 
-        for link in self._node_links:
+        for link in update.node_links:
+            source = dpg.get_item_user_data(dpg.get_item_info(link.source)["parent"])
+            target = dpg.get_item_user_data(dpg.get_item_info(link.target)["parent"])
             data["links"].append(
                 {
-                    "source": str(dpg.get_item_user_data(dpg.get_item_info(link.source)["parent"])),
-                    "target": str(dpg.get_item_user_data(dpg.get_item_info(link.target)["parent"])),
+                    "source": source.name,
+                    "target": target.name,
                 }
             )
 
         if self._project:
             with open(self._project, "w") as file:
                 file.write(json.dumps(data))
+            return toaster.show("Save Project", "Project saved successfully.")
+
+        self._data = data
+        fd.change(self.save_callback, True, ".cresliant")
+        fd.show_file_dialog()
+
+    def save_callback(self, info):
+        try:
+            filename = info[0]
+            location = info[2]
+        except IndexError:
+            toaster.show("Save project", "Invalid location specified.")
             return
 
-        location = asksaveasfilename(
-            filetypes=[("Cresliant", "*.cresliant")],
-            defaultextension=".cresliant",
-            initialfile="project.cresliant",
-            initialdir=os.curdir,
-        )
+        if not filename.endswith(".cresliant"):
+            filename += ".cresliant"
+
+        location = os.path.join(location, filename)
+
         try:
             with open(location, "w") as file:
-                file.write(json.dumps(data))
+                file.write(json.dumps(self._data))
         except FileNotFoundError:
+            toaster.show("Save Project", "Invalid location specified.")
             return
 
         self._project = location
+        toaster.show("Save Project", "Project saved successfully.")
 
     def open(self):
+        fd.change(self.open_callback, False, ".cresliant")
+        fd.show_file_dialog()
+
+    def open_callback(self, info):
+        location = info[0]
         try:
-            location = askopenfilename(
-                filetypes=[("Cresliant", "*.cresliant")],
-                initialdir=os.curdir,
-            )
-            data = json.load(open(location))
+            with open(location) as file:
+                data = json.load(file)
         except FileNotFoundError:
-            return
+            return toaster.show("Open Project", "Invalid location specified.")
 
         self.reset()
-
         nodes = []
         for node in data["nodes"]:
             module = None
@@ -374,10 +342,10 @@ class NodeEditor:
             source = None
             target = None
             for node in nodes:
-                check = node.split("_", maxsplit=2)[0]
-                if check in link["source"]:
+                check = node.split("_", maxsplit=2)[0].lower()
+                if check == link["source"].lower():
                     source = dpg.get_item_info(node)["children"][1][-1]
-                elif check in link["target"]:
+                elif check == link["target"].lower():
                     target = dpg.get_item_info(node)["children"][1][0]
 
             if not source or not target:
@@ -388,11 +356,12 @@ class NodeEditor:
                 target,
                 parent=self._tag,
             )
-            self._node_links.append(Link(source=source, target=target, id=int(link)))
+            update.node_links.append(Link(source=source, target=target, id=int(link)))
 
         self._project = location
-        self.update_path()
-        self.update_output()
+        update.update_path()
+        update.update_output()
+        toaster.show("Open Project", "Project opened successfully.")
 
 
-node_editor = NodeEditor(Image.open(resource_path("icon.ico")))
+node_editor = NodeEditor(Image.open(resource("icon.ico")))
