@@ -2,13 +2,12 @@
 <h1 align="center">
 <img src="./assets/icon.ico" width="100" />
 <br>Cresliant</h1>
-<h3>A powerful node-based image editor made in Python</h3>
-<img align="center" src="https://cresliant.github.io/img/demo-image.png" width=800 height=449 />
-<br/><br/>
 <p align="center">
 <img src="https://img.shields.io/badge/Python-3776AB.svg?style=flat-square&logo=Python&logoColor=white" alt="Python" />
 <img src="https://img.shields.io/badge/License-GPL--3.0-orange.svg" alt="License" />
 </p>
+<h3>A powerful node-based image editor made in Python</h3>
+<img align="center" src="https://cresliant.github.io/img/demo-image.png" width=800 height=449 />
 </div>
 
 ---
