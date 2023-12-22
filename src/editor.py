@@ -1,3 +1,4 @@
+import importlib.metadata
 import importlib.util
 import json
 import os
@@ -5,6 +6,7 @@ import sys
 
 import dearpygui.dearpygui as dpg
 import yaml
+from packaging.version import parse as parse_version
 from PIL import Image
 
 from src.corenodes.display import InputModule, OutputModule
@@ -70,7 +72,19 @@ class NodeEditor:
                         version = f"=={requirement['version']}"
                     except KeyError:
                         version = ""
-                    os.system(f"pip install {requirement['name']}{version}")
+
+                    try:
+                        installed_version = parse_version(importlib.metadata.version(requirement["name"]))
+                        if installed_version != requirement.get("version", installed_version):
+                            print(
+                                f"Error when trying to load '{info['name']}': "
+                                f"{requirement['name']} is already installed with a different version."
+                            )
+                            sys.exit(1)
+                        else:
+                            print(f"Info: {requirement['name']} is already installed so skipping.")
+                    except importlib.metadata.PackageNotFoundError:
+                        os.system(f"pip install {requirement['name']}{version}")
 
             file = info["runtime"]["main"]
             if not file.endswith(".py"):
